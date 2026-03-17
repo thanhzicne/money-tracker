@@ -1,0 +1,121 @@
+import React from 'react';
+import { 
+  MdDashboard, 
+  MdAnalytics, 
+  MdChevronLeft, 
+  MdChevronRight, 
+  MdDarkMode, 
+  MdLightMode,
+  MdPerson,
+  MdLogout
+} from 'react-icons/md';
+import { useAuth } from '../hooks/useAuth';
+
+import { useTheme } from '../hooks/useTheme';
+
+const Sidebar = ({ 
+  selectedDate, 
+  changeMonth, 
+  activePage, 
+  setActivePage 
+}) => {
+  const { user, logout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  
+  const monthNames = [
+    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+  ];
+
+  const formattedDate = `${monthNames[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}`;
+
+  const navItems = [
+    { id: 'dashboard', label: 'Tổng quan', icon: <MdDashboard size={20} /> },
+    { id: 'analytics', label: 'Phân tích', icon: <MdAnalytics size={20} /> },
+    { id: 'profile', label: 'Cá nhân', icon: <MdPerson size={20} /> },
+  ];
+
+  return (
+    <aside className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col transition-all duration-300 z-50">
+      <div className="p-6 flex flex-col items-center overflow-y-auto">
+        <h1 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-8 tracking-tighter">Money Tracker</h1>
+        
+        {/* Month Selector */}
+        <div className="w-full flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/50 mb-8">
+          <button 
+            onClick={() => changeMonth(-1)}
+            className="p-1.5 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all text-zinc-400 hover:text-emerald-600"
+          >
+            <MdChevronLeft size={24} />
+          </button>
+          <span className="font-black text-zinc-700 dark:text-zinc-200 text-xs uppercase tracking-widest">
+            {formattedDate}
+          </span>
+          <button 
+            onClick={() => changeMonth(1)}
+            className="p-1.5 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all text-zinc-400 hover:text-emerald-600"
+          >
+            <MdChevronRight size={24} />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="w-full space-y-2 mb-8">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActivePage(item.id)}
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${
+                activePage === item.id
+                  ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-emerald-600 dark:hover:text-emerald-400'
+              }`}
+            >
+              {item.icon}
+              <span className="font-bold text-sm tracking-wide">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* User Mini Profile */}
+        <div className="w-full mt-auto p-5 bg-zinc-50 dark:bg-zinc-900/30 rounded-[2rem] border border-zinc-100 dark:border-zinc-800/50">
+          <div className="flex items-center gap-4 mb-4">
+            <img 
+              src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || 'User'}&background=10b981&color=fff`} 
+              className="w-12 h-12 rounded-2xl object-cover border-2 border-white dark:border-zinc-800 shadow-sm"
+              alt="Avatar"
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-black text-zinc-800 dark:text-white truncate tracking-tight">{user?.displayName || 'Người dùng'}</p>
+              <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 truncate uppercase tracking-tighter">{user?.email}</p>
+            </div>
+          </div>
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-xl transition-all"
+          >
+            <MdLogout size={16} />
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+
+      {/* Dark Mode Toggle */}
+      <div className="mt-auto p-6 border-t border-zinc-50 dark:border-zinc-800">
+        <button
+          onClick={toggleDarkMode}
+          className="w-full flex items-center justify-between px-5 py-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+        >
+          <span className="text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+            {isDarkMode ? 'Chế độ tối' : 'Chế độ sáng'}
+          </span>
+          <div className={`p-2 rounded-xl transition-all shadow-lg ${isDarkMode ? 'bg-emerald-600 text-white shadow-emerald-500/20' : 'bg-amber-100 text-amber-600 shadow-amber-500/10'}`}>
+            {isDarkMode ? <MdDarkMode size={18} /> : <MdLightMode size={18} />}
+          </div>
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;

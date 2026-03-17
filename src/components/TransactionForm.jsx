@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MdAdd, MdSave, MdCancel, MdRefresh, MdSwapHoriz } from 'react-icons/md';
+import { MdAdd, MdSave, MdCancel, MdRefresh, MdSwapHoriz, MdCategory, MdAccountBalanceWallet } from 'react-icons/md';
+import CustomSelect from './CustomSelect';
 
 const categories = {
   income: ['Lương', 'Kinh doanh', 'Đầu tư', 'Thưởng', 'Khác'],
   expense: ['Ăn uống', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Hóa đơn', 'Sức khỏe', 'Giáo dục', 'Khác'],
   transfer: ['Chuyển tiền nội bộ']
+};
+
+const categoryIcons = {
+  'Ăn uống': '🍴',
+  'Di chuyển': '🚗',
+  'Mua sắm': '🛍️',
+  'Giải trí': '🎬',
+  'Hóa đơn': '📄',
+  'Sức khỏe': '💊',
+  'Giáo dục': '📚',
+  'Lương': '💰',
+  'Kinh doanh': '🏢',
+  'Đầu tư': '📈',
+  'Thưởng': '🎁',
+  'Khác': '✨',
+  'Chuyển tiền nội bộ': '🔄'
 };
 
 const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setEditingTransaction, wallets }) => {
@@ -106,6 +123,18 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
     setErrors({});
   };
 
+  const walletOptions = wallets.map(w => ({
+    value: w.id,
+    label: w.name,
+    icon: w.icon || '💳'
+  }));
+
+  const categoryOptions = categories[activeTab].map(cat => ({
+    value: cat,
+    label: cat,
+    icon: categoryIcons[cat] || '✨'
+  }));
+
   return (
     <div className="card h-full p-8 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-1 h-full bg-emerald-600"></div>
@@ -161,31 +190,27 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
             {/* Wallet Selection */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('wallets')}</label>
-              <select
+              <CustomSelect
                 value={formData.walletId}
-                onChange={(e) => setFormData({ ...formData, walletId: e.target.value })}
-                className={`input-field font-bold text-sm cursor-pointer ${errors.walletId ? 'border-rose-500 ring-4 ring-rose-500/10' : ''}`}
-              >
-                <option value="">{t('select_wallet')}...</option>
-                {wallets.map(w => (
-                  <option key={w.id} value={w.id}>{w.icon} {w.name}</option>
-                ))}
-              </select>
+                onChange={(val) => setFormData({ ...formData, walletId: val })}
+                options={walletOptions}
+                icon={MdAccountBalanceWallet}
+                placeholder={t('select_wallet')}
+                className={errors.walletId ? 'ring-4 ring-rose-500/10' : ''}
+              />
               {errors.walletId && <p className="text-rose-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-1">{errors.walletId}</p>}
             </div>
 
             {/* Category */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('category')}</label>
-              <select
+              <CustomSelect
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`input-field font-bold text-sm cursor-pointer ${errors.category ? 'border-rose-500 ring-4 ring-rose-500/10' : ''}`}
-              >
-                {categories[activeTab].map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+                onChange={(val) => setFormData({ ...formData, category: val })}
+                options={categoryOptions}
+                icon={MdCategory}
+                placeholder={t('category')}
+              />
             </div>
           </div>
         ) : (
@@ -193,32 +218,28 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
             {/* From Wallet */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('from_wallet')}</label>
-              <select
+              <CustomSelect
                 value={formData.walletId}
-                onChange={(e) => setFormData({ ...formData, walletId: e.target.value })}
-                className={`input-field font-bold text-sm cursor-pointer ${errors.walletId ? 'border-rose-500 ring-4 ring-rose-500/10' : ''}`}
-              >
-                <option value="">{t('select_wallet')}...</option>
-                {wallets.map(w => (
-                  <option key={w.id} value={w.id}>{w.icon} {w.name}</option>
-                ))}
-              </select>
+                onChange={(val) => setFormData({ ...formData, walletId: val })}
+                options={walletOptions}
+                icon={MdAccountBalanceWallet}
+                placeholder={t('select_wallet')}
+                className={errors.walletId ? 'ring-4 ring-rose-500/10' : ''}
+              />
               {errors.walletId && <p className="text-rose-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-1">{errors.walletId}</p>}
             </div>
 
             {/* To Wallet */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('to_wallet')}</label>
-              <select
+              <CustomSelect
                 value={formData.toWalletId}
-                onChange={(e) => setFormData({ ...formData, toWalletId: e.target.value })}
-                className={`input-field font-bold text-sm cursor-pointer ${errors.toWalletId ? 'border-rose-500 ring-4 ring-rose-500/10' : ''}`}
-              >
-                <option value="">{t('select_wallet')}...</option>
-                {wallets.map(w => (
-                  <option key={w.id} value={w.id}>{w.icon} {w.name}</option>
-                ))}
-              </select>
+                onChange={(val) => setFormData({ ...formData, toWalletId: val })}
+                options={walletOptions}
+                icon={MdAccountBalanceWallet}
+                placeholder={t('select_wallet')}
+                className={errors.toWalletId ? 'ring-4 ring-rose-500/10' : ''}
+              />
               {errors.toWalletId && <p className="text-rose-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-1">{errors.toWalletId}</p>}
             </div>
           </div>

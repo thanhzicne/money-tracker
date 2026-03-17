@@ -43,14 +43,14 @@ const Dashboard = ({
             className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors border border-emerald-100 dark:border-emerald-800/50"
           >
             <MdTableChart size={20} />
-            Excel (.xlsx)
+            {t('export_excel')}
           </button>
           <button 
             onClick={() => exportToPDF(transactions)}
             className="flex items-center gap-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold text-sm hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors border border-rose-100 dark:border-rose-800/50"
           >
             <MdPictureAsPdf size={20} />
-            PDF Report
+            {t('export_pdf')}
           </button>
         </div>
       </section>

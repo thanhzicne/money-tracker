@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MdSearch, MdFilterList, MdEdit, MdDelete, MdTrendingUp, MdTrendingDown, MdFileDownload } from 'react-icons/md';
 import { exportToExcel, exportToPDF } from '../utils/exportUtils';
+import CustomSelect from './CustomSelect';
 
 const TransactionList = ({ transactions, onEdit, onDelete }) => {
   const { t, i18n } = useTranslation();
@@ -15,6 +16,12 @@ const TransactionList = ({ transactions, onEdit, onDelete }) => {
     const matchesFilter = filterType === 'all' || t.type === filterType;
     return matchesSearch && matchesFilter;
   });
+
+  const filterOptions = [
+    { value: 'all', label: t('all'), icon: '📊' },
+    { value: 'income', label: t('only_income'), icon: '📈' },
+    { value: 'expense', label: t('only_expense'), icon: '📉' }
+  ];
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
@@ -39,7 +46,7 @@ const TransactionList = ({ transactions, onEdit, onDelete }) => {
           <h2 className="text-xl font-black text-zinc-800 dark:text-white mb-0">{t('history')}</h2>
           <p className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5">Danh sách các khoản thu chi</p>
         </div>
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto items-center">
           <div className="relative group flex-1 md:flex-none">
             <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
             <input
@@ -50,32 +57,29 @@ const TransactionList = ({ transactions, onEdit, onDelete }) => {
               className="pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 w-full md:w-56 font-bold text-sm transition-all"
             />
           </div>
-          <div className="relative group">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="pl-4 pr-10 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 cursor-pointer appearance-none text-sm font-black uppercase tracking-wider transition-all"
-            >
-              <option value="all">{t('all')}</option>
-              <option value="income">{t('only_income')}</option>
-              <option value="expense">{t('only_expense')}</option>
-            </select>
-            <MdFilterList className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={18} />
-          </div>
+          
+          <CustomSelect
+            value={filterType}
+            onChange={setFilterType}
+            options={filterOptions}
+            icon={MdFilterList}
+            className="w-full md:w-48"
+          />
+
           <div className="flex gap-2">
             <button 
               onClick={() => exportToExcel(filtered)}
-              className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all shadow-sm"
+              className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all shadow-sm group"
               title={t('export_excel')}
             >
-              <MdFileDownload size={20} />
+              <MdFileDownload className="group-hover:scale-110 transition-transform" size={20} />
             </button>
             <button 
               onClick={() => exportToPDF(filtered)}
-              className="p-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all shadow-sm"
+              className="p-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all shadow-sm group"
               title={t('export_pdf')}
             >
-              <MdFileDownload size={20} />
+              <MdFileDownload className="group-hover:scale-110 transition-transform" size={20} />
             </button>
           </div>
         </div>

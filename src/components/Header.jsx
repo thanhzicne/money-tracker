@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MdAccountBalanceWallet, MdNotifications } from 'react-icons/md';
+import CustomSelect from './CustomSelect';
 
 const Header = ({ wallets, activeWalletId, setActiveWalletId, activePage }) => {
   const { t } = useTranslation();
@@ -15,6 +16,15 @@ const Header = ({ wallets, activeWalletId, setActiveWalletId, activePage }) => {
     }
   };
 
+  const walletOptions = [
+    { value: 'all', label: `${t('all')} ${t('wallets')}`, icon: '🌍' },
+    ...(wallets?.map(w => ({ 
+      value: w.id, 
+      label: w.name, 
+      icon: w.icon || '💳' 
+    })) || [])
+  ];
+
   return (
     <header className="flex items-center justify-between mb-8 pb-6 border-b border-zinc-100 dark:border-zinc-800/50">
       <div>
@@ -26,27 +36,16 @@ const Header = ({ wallets, activeWalletId, setActiveWalletId, activePage }) => {
 
       <div className="flex items-center gap-4">
         {/* Global Wallet Filter */}
-        <div className="relative group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
-            <MdAccountBalanceWallet size={18} />
-          </div>
-          <select
-            value={activeWalletId}
-            onChange={(e) => setActiveWalletId(e.target.value)}
-            className="pl-11 pr-10 py-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-emerald-500/10 shadow-sm transition-all cursor-pointer appearance-none min-w-[180px]"
-          >
-            <option value="all">{t('all')} {t('wallets')}</option>
-            {wallets?.map(w => (
-              <option key={w.id} value={w.id}>{w.icon} {w.name}</option>
-            ))}
-          </select>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-          </div>
-        </div>
+        <CustomSelect
+          value={activeWalletId}
+          onChange={setActiveWalletId}
+          options={walletOptions}
+          icon={MdAccountBalanceWallet}
+          className="min-w-[200px]"
+        />
 
-        <button className="p-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-400 hover:text-emerald-500 transition-all shadow-sm">
-          <MdNotifications size={20} />
+        <button className="p-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-400 hover:text-emerald-500 transition-all shadow-sm group">
+          <MdNotifications className="group-hover:animate-shake" size={20} />
         </button>
       </div>
     </header>

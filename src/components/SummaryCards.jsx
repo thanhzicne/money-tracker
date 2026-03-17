@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MdTrendingUp, MdTrendingDown, MdAccountBalanceWallet } from 'react-icons/md';
 
 const SummaryCards = ({ stats }) => {
+  const { t, i18n } = useTranslation();
   const cards = [
     {
-      title: 'Tổng Thu',
+      title: t('total_income'),
       amount: stats.income,
       color: 'bg-emerald-500',
       bg: 'bg-emerald-50 dark:bg-emerald-500/10',
@@ -12,7 +14,7 @@ const SummaryCards = ({ stats }) => {
       textColor: 'text-emerald-600 dark:text-emerald-400'
     },
     {
-      title: 'Tổng Chi',
+      title: t('total_expense'),
       amount: stats.expense,
       color: 'bg-rose-500',
       bg: 'bg-rose-50 dark:bg-rose-500/10',
@@ -20,7 +22,7 @@ const SummaryCards = ({ stats }) => {
       textColor: 'text-rose-600 dark:text-rose-400'
     },
     {
-      title: 'Tổng Số Dư',
+      title: t('total_balance'),
       amount: stats.balance,
       color: 'bg-emerald-500',
       bg: 'bg-emerald-50 dark:bg-emerald-500/10',
@@ -30,7 +32,10 @@ const SummaryCards = ({ stats }) => {
   ];
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      style: 'currency', 
+      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    }).format(amount);
   };
 
   return (

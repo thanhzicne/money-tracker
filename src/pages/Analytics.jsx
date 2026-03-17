@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -13,12 +14,12 @@ import { MdTrendingUp, MdTrendingDown } from 'react-icons/md';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Analytics = ({ transactions, selectedDate }) => {
+  const { t, i18n } = useTranslation();
   // --- Yearly Bar Chart Data ---
   const currentYear = selectedDate.getFullYear();
-  const months = [
-    'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 
-    'T7', 'T8', 'T9', 'T10', 'T11', 'T12'
-  ];
+  const months = i18n.language === 'vi' 
+    ? ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12']
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const yearlyIncome = Array(12).fill(0);
   const yearlyExpense = Array(12).fill(0);
@@ -39,13 +40,13 @@ const Analytics = ({ transactions, selectedDate }) => {
     labels: months,
     datasets: [
       {
-        label: 'Thu nhập',
+        label: t('income'),
         data: yearlyIncome,
         backgroundColor: 'rgba(16, 185, 129, 0.7)',
         borderRadius: 4,
       },
       {
-        label: 'Chi tiêu',
+        label: t('expense'),
         data: yearlyExpense,
         backgroundColor: 'rgba(244, 63, 94, 0.7)',
         borderRadius: 4,
@@ -60,7 +61,7 @@ const Analytics = ({ transactions, selectedDate }) => {
       legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true } },
       title: { 
         display: true, 
-        text: `Biểu đồ thu chi năm ${currentYear}`, 
+        text: t('yearly_summary', { year: currentYear }), 
         font: { size: 18, weight: 'bold' },
         padding: { bottom: 24 }
       },
@@ -69,13 +70,13 @@ const Analytics = ({ transactions, selectedDate }) => {
           label: (context) => {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
-            return `${label}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)}`;
+            return `${label}: ${new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(value)}`;
           }
         }
       }
     },
     scales: {
-      y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString('vi-VN') } }
+      y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString(i18n.language === 'vi' ? 'vi-VN' : 'en-US') } }
     },
   };
 
@@ -96,12 +97,12 @@ const Analytics = ({ transactions, selectedDate }) => {
     .slice(0, 3);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(amount);
   };
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    return date.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit' });
   };
 
   return (
@@ -119,11 +120,11 @@ const Analytics = ({ transactions, selectedDate }) => {
             <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg">
               <MdTrendingUp size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Top 3 Thu nhập lớn nhất</h3>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{t('top_incomes')}</h3>
           </div>
           <div className="space-y-4">
             {topIncome.length === 0 ? (
-              <p className="text-gray-400 text-center py-8 italic">Chưa có dữ liệu thu nhập trong tháng</p>
+              <p className="text-gray-400 text-center py-8 italic">{t('no_data')}</p>
             ) : (
               topIncome.map((t, idx) => (
                 <div key={t.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700">
@@ -132,7 +133,7 @@ const Analytics = ({ transactions, selectedDate }) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-800 dark:text-gray-100 truncate">{t.category}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(t.date)} - {t.note || 'Không có ghi chú'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(t.date)} - {t.note || '...'}</p>
                   </div>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(t.amount)}</span>
                 </div>
@@ -147,11 +148,11 @@ const Analytics = ({ transactions, selectedDate }) => {
             <div className="p-2 bg-rose-100 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-lg">
               <MdTrendingDown size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Top 3 Chi tiêu lớn nhất</h3>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{t('top_expenses')}</h3>
           </div>
           <div className="space-y-4">
             {topExpense.length === 0 ? (
-              <p className="text-gray-400 text-center py-8 italic">Chưa có dữ liệu chi tiêu trong tháng</p>
+              <p className="text-gray-400 text-center py-8 italic">{t('no_data')}</p>
             ) : (
               topExpense.map((t, idx) => (
                 <div key={t.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700">
@@ -160,7 +161,7 @@ const Analytics = ({ transactions, selectedDate }) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-800 dark:text-gray-100 truncate">{t.category}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(t.date)} - {t.note || 'Không có ghi chú'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(t.date)} - {t.note || '...'}</p>
                   </div>
                   <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(t.amount)}</span>
                 </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   MdDashboard, 
   MdAnalytics, 
@@ -7,41 +7,50 @@ import {
   MdDarkMode, 
   MdLightMode,
   MdPerson,
-  MdLogout
+  MdLogout,
+  MdAccountBalanceWallet,
+  MdTranslate
 } from 'react-icons/md';
 import { useAuth } from '../hooks/useAuth';
-
 import { useTheme } from '../hooks/useTheme';
 
 const Sidebar = ({ 
   selectedDate, 
   changeMonth, 
   activePage, 
-  setActivePage 
+  setActivePage,
+  wallets,
+  activeWalletId,
+  setActiveWalletId
 }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const { t, i18n } = useTranslation();
   
-  const monthNames = [
-    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
-  ];
+  const monthNames = i18n.language === 'vi' 
+    ? ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   const formattedDate = `${monthNames[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}`;
 
   const navItems = [
-    { id: 'dashboard', label: 'Tổng quan', icon: <MdDashboard size={20} /> },
-    { id: 'analytics', label: 'Phân tích', icon: <MdAnalytics size={20} /> },
-    { id: 'profile', label: 'Cá nhân', icon: <MdPerson size={20} /> },
+    { id: 'dashboard', label: t('dashboard'), icon: <MdDashboard size={20} /> },
+    { id: 'analytics', label: t('analytics'), icon: <MdAnalytics size={20} /> },
+    { id: 'wallets', label: t('wallets'), icon: <MdAccountBalanceWallet size={20} /> },
+    { id: 'profile', label: t('profile'), icon: <MdPerson size={20} /> },
   ];
+
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi');
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col transition-all duration-300 z-50">
-      <div className="p-6 flex flex-col items-center overflow-y-auto">
-        <h1 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-8 tracking-tighter">Money Tracker</h1>
+      <div className="p-6 flex flex-col items-center overflow-y-auto h-full">
+        <h1 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-8 tracking-tighter">{t('app_name')}</h1>
         
         {/* Month Selector */}
-        <div className="w-full flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/50 mb-8">
+        <div className="w-full flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800/50 mb-6">
           <button 
             onClick={() => changeMonth(-1)}
             className="p-1.5 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all text-zinc-400 hover:text-emerald-600"
@@ -95,19 +104,33 @@ const Sidebar = ({
             className="w-full flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-xl transition-all"
           >
             <MdLogout size={16} />
-            Đăng xuất
+            {t('logout')}
           </button>
         </div>
       </div>
 
-      {/* Dark Mode Toggle */}
-      <div className="mt-auto p-6 border-t border-zinc-50 dark:border-zinc-800">
+      {/* Toggles */}
+      <div className="mt-auto p-6 border-t border-zinc-50 dark:border-zinc-800 space-y-3">
+        {/* Language Toggle */}
+        <button
+          onClick={toggleLanguage}
+          className="w-full flex items-center justify-between px-5 py-3 bg-zinc-50 dark:bg-zinc-900 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-zinc-100 dark:border-zinc-800"
+        >
+          <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+            {i18n.language === 'vi' ? 'Tiếng Việt' : 'English'}
+          </span>
+          <div className="p-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+            <MdTranslate size={18} />
+          </div>
+        </button>
+
+        {/* Theme Toggle */}
         <button
           onClick={toggleDarkMode}
-          className="w-full flex items-center justify-between px-5 py-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+          className="w-full flex items-center justify-between px-5 py-3 bg-zinc-50 dark:bg-zinc-900 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all border border-zinc-100 dark:border-zinc-800"
         >
-          <span className="text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            {isDarkMode ? 'Chế độ tối' : 'Chế độ sáng'}
+          <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+            {isDarkMode ? t('dark_mode') : t('light_mode')}
           </span>
           <div className={`p-2 rounded-xl transition-all shadow-lg ${isDarkMode ? 'bg-emerald-600 text-white shadow-emerald-500/20' : 'bg-amber-100 text-amber-600 shadow-amber-500/10'}`}>
             {isDarkMode ? <MdDarkMode size={18} /> : <MdLightMode size={18} />}

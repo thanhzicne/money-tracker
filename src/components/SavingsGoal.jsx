@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MdEdit, MdCheck, MdTrendingUp } from 'react-icons/md';
 
 const SavingsGoal = ({ goal, setGoal, progress, balance }) => {
+  const { t, i18n } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [tempGoal, setTempGoal] = useState(goal);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      style: 'currency', 
+      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    }).format(amount);
   };
 
   const handleSave = () => {
@@ -23,8 +28,8 @@ const SavingsGoal = ({ goal, setGoal, progress, balance }) => {
             <MdTrendingUp size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white mb-0">Mục tiêu tiết kiệm</h2>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Dựa trên tổng số dư hiện tại</p>
+            <h2 className="text-xl font-black text-slate-800 dark:text-white mb-0">{t('savings_goal')}</h2>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('based_on_balance')}</p>
           </div>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -63,14 +68,14 @@ const SavingsGoal = ({ goal, setGoal, progress, balance }) => {
       <div className="space-y-6 relative z-10">
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tiến độ đạt được</span>
+            <span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('progress')}</span>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-slate-800 dark:text-white">{progress.toFixed(1)}%</span>
-              <span className="text-sm font-bold text-slate-400 dark:text-slate-500">hoàn thành</span>
+              <span className="text-sm font-bold text-slate-400 dark:text-slate-500">{t('completed')}</span>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Hiện có</span>
+            <span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">{t('currently_have')}</span>
             <span className="text-lg font-black text-emerald-500">{formatCurrency(balance)}</span>
           </div>
         </div>
@@ -87,8 +92,8 @@ const SavingsGoal = ({ goal, setGoal, progress, balance }) => {
         </div>
         
         <div className="flex justify-between items-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          <span>Khởi đầu</span>
-          <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">{formatCurrency(goal)} Mục tiêu</span>
+          <span>{t('start')}</span>
+          <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">{formatCurrency(goal)} {t('goal')}</span>
         </div>
       </div>
     </div>

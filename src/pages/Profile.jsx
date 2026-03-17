@@ -1,17 +1,26 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars } from 'react-icons/md';
 
 const Profile = ({ transactionsCount, totalBalance }) => {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      style: 'currency', 
+      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    }).format(amount);
   };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
   };
 
   return (
@@ -31,7 +40,7 @@ const Profile = ({ transactionsCount, totalBalance }) => {
               </div>
             </div>
             <div className="flex-1 pb-2">
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{user?.displayName || 'Người dùng'}</h1>
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{user?.displayName || t('user')}</h1>
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1 font-medium">
                 <MdEmail size={18} className="text-blue-500" />
                 {user?.email}
@@ -42,25 +51,25 @@ const Profile = ({ transactionsCount, totalBalance }) => {
               className="px-6 py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-2xl font-bold flex items-center gap-2 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all shadow-sm active:scale-[0.98]"
             >
               <MdLogout size={20} />
-              Đăng xuất
+              {t('logout')}
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-gray-50 dark:bg-slate-700/50 rounded-2xl border border-gray-100 dark:border-slate-600/50">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Tổng tài sản</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t('total_assets')}</p>
               <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
                 {formatCurrency(totalBalance)}
               </h3>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-700/50 rounded-2xl border border-gray-100 dark:border-slate-600/50">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Số giao dịch</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t('transactions_count')}</p>
               <h3 className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
                 {transactionsCount}
               </h3>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-700/50 rounded-2xl border border-gray-100 dark:border-slate-600/50">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Ngày tham gia</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t('joined_date')}</p>
               <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 tracking-tight flex items-center gap-2">
                 <MdDateRange size={20} className="text-blue-500" />
                 {formatDate(user?.metadata.creationTime)}
@@ -73,7 +82,7 @@ const Profile = ({ transactionsCount, totalBalance }) => {
       <div className="card p-8">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
           <MdPerson className="text-blue-500" size={24} />
-          Thông tin tài khoản
+          {t('account_info')}
         </h2>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-6 border-b border-gray-100 dark:border-slate-700">
@@ -82,16 +91,16 @@ const Profile = ({ transactionsCount, totalBalance }) => {
               <p className="font-mono text-sm text-gray-600 dark:text-gray-400 break-all">{user?.uid}</p>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Phương thức đăng nhập</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{t('login_method')}</p>
               <p className="font-bold text-gray-700 dark:text-gray-200 capitalize">
-                {user?.providerData[0]?.providerId === 'google.com' ? 'Google Account' : 'Email & Password'}
+                {user?.providerData[0]?.providerId === 'google.com' ? t('google_login') : 'Email & Password'}
               </p>
             </div>
           </div>
           
           <div className="pt-2">
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed italic">
-              * Toàn bộ dữ liệu giao dịch của bạn được mã hóa và lưu trữ an toàn trên máy chủ của chúng tôi. Bạn có thể đăng nhập trên các thiết bị khác để đồng bộ dữ liệu.
+              {t('sync_notice')}
             </p>
           </div>
         </div>

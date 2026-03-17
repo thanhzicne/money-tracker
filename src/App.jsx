@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
+import Wallets from './pages/Wallets';
 import Login from './pages/Login';
 import { useMoneyTracker } from './hooks/useMoneyTracker';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -21,12 +22,23 @@ function AppContent() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
-        return <Dashboard {...tracker} />;
+        return <Dashboard {...tracker} setActivePage={setActivePage} />;
       case 'analytics':
         return (
           <Analytics 
             transactions={tracker.transactions} 
             selectedDate={tracker.selectedDate} 
+          />
+        );
+      case 'wallets':
+        return (
+          <Wallets 
+            wallets={tracker.wallets}
+            addWallet={tracker.addWallet}
+            updateWallet={tracker.updateWallet}
+            deleteWallet={tracker.deleteWallet}
+            totalBalance={tracker.totalBalance}
+            transactions={tracker.transactions}
           />
         );
       case 'profile':

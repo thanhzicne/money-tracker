@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -26,6 +27,7 @@ ChartJS.register(
 );
 
 const DashboardCharts = ({ transactions, selectedDate }) => {
+  const { t, i18n } = useTranslation();
   // --- Data Preparation for Bar Chart (Daily) ---
   const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
   const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -46,13 +48,13 @@ const DashboardCharts = ({ transactions, selectedDate }) => {
     labels,
     datasets: [
       {
-        label: 'Thu nhập',
+        label: t('income'),
         data: dailyIncome,
         backgroundColor: 'rgba(16, 185, 129, 0.7)',
         borderRadius: 4,
       },
       {
-        label: 'Chi tiêu',
+        label: t('expense'),
         data: dailyExpense,
         backgroundColor: 'rgba(244, 63, 94, 0.7)',
         borderRadius: 4,
@@ -65,19 +67,19 @@ const DashboardCharts = ({ transactions, selectedDate }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, padding: 20 } },
-      title: { display: true, text: 'Biểu đồ Thu/Chi hàng ngày', padding: { bottom: 20 }, font: { size: 16, weight: 'bold' } },
+      title: { display: true, text: t('daily_chart'), padding: { bottom: 20 }, font: { size: 16, weight: 'bold' } },
       tooltip: {
         callbacks: {
           label: (context) => {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
-            return `${label}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)}`;
+            return `${label}: ${new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(value)}`;
           }
         }
       }
     },
     scales: {
-      y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString('vi-VN') } }
+      y: { beginAtZero: true, ticks: { callback: (value) => value.toLocaleString(i18n.language === 'vi' ? 'vi-VN' : 'en-US') } }
     },
   };
 
@@ -111,14 +113,14 @@ const DashboardCharts = ({ transactions, selectedDate }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: { display: true, text: 'Phân tích danh mục chi tiêu', padding: { bottom: 20 }, font: { size: 16, weight: 'bold' } },
+      title: { display: true, text: t('category_analysis'), padding: { bottom: 20 }, font: { size: 16, weight: 'bold' } },
       tooltip: {
         callbacks: {
           label: (context) => {
             const label = context.label || '';
             const value = context.raw;
             const percentage = ((value / totalExpense) * 100).toFixed(1);
-            return `${label}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)} (${percentage}%)`;
+            return `${label}: ${new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(value)} (${percentage}%)`;
           }
         }
       }
@@ -136,9 +138,9 @@ const DashboardCharts = ({ transactions, selectedDate }) => {
           <div className="flex-1 min-h-0 relative">
             <Doughnut data={donutData} options={donutOptions} />
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-8">
-              <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Tổng chi tiêu</span>
+              <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{t('total_expense')}</span>
               <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">
-                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalExpense)}
+                {new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(totalExpense)}
               </span>
             </div>
           </div>

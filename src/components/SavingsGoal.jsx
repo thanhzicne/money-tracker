@@ -20,45 +20,45 @@ const SavingsGoal = ({ goal, setGoal, progress, balance }) => {
   };
 
   return (
-    <div className="card p-8 mb-8 relative overflow-hidden group">
+    <div className="card p-5 md:p-8 mb-6 md:mb-8 relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32 transition-transform group-hover:scale-110"></div>
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20">
-            <MdTrendingUp size={24} />
+      <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-8 relative z-10">
+        <div className="flex items-start sm:items-center gap-3 md:gap-4">
+          <div className="p-2.5 md:p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20 flex-shrink-0">
+            <MdTrendingUp size={20} />
           </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white mb-0">{t('savings_goal')}</h2>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('based_on_balance')}</p>
+          <div className="min-w-0">
+            <h2 className="text-lg md:text-xl font-black text-slate-800 dark:text-white mb-0">{t('savings_goal')}</h2>
+            <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">{t('based_on_balance')}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full\">
           {isEditing ? (
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex items-center gap-2 w-full\">
               <input
                 type="number"
                 value={tempGoal}
                 onChange={(e) => setTempGoal(e.target.value)}
-                className="input-field text-right w-full md:w-48 py-2.5 font-bold text-lg"
+                className="input-field text-right flex-1 py-2.5 font-bold text-base md:text-lg"
                 autoFocus
               />
               <button 
                 onClick={handleSave}
-                className="p-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-90"
+                className="p-2.5 md:p-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-90 flex-shrink-0"
               >
-                <MdCheck size={24} />
+                <MdCheck size={20} />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-2 pl-5 rounded-2xl border border-slate-100 dark:border-slate-700/50 w-full md:w-auto justify-between">
-              <span className="font-black text-blue-600 dark:text-blue-400 text-xl tracking-tight">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-2.5 md:p-3.5 px-3 md:pl-5 rounded-2xl border border-slate-100 dark:border-slate-700/50 w-full justify-between\">
+              <span className="font-black text-blue-600 dark:text-blue-400 text-base md:text-xl tracking-tight truncate\">
                 {formatCurrency(goal)}
               </span>
               <button 
                 onClick={() => { setTempGoal(goal); setIsEditing(true); }}
-                className="p-2.5 hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-blue-500 rounded-xl transition-all shadow-sm hover:shadow-md"
+                className="p-2 md:p-2.5 hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-blue-500 rounded-xl transition-all shadow-sm hover:shadow-md flex-shrink-0"
               >
-                <MdEdit size={20} />
+                <MdEdit size={18} />
               </button>
             </div>
           )}

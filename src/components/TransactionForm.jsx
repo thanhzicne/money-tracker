@@ -140,38 +140,38 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
       <div className="absolute top-0 left-0 w-1 h-full bg-emerald-600"></div>
       
       {/* Tabs */}
-      <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl mb-8">
+      <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl mb-6 md:mb-8 overflow-x-auto">
         {['expense', 'income', 'transfer'].map(tab => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-white dark:bg-zinc-800 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'}`}
+            className={`flex-1 min-w-max py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-white dark:bg-zinc-800 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'}`}
           >
-            {tab === 'transfer' ? <MdSwapHoriz className="inline mr-2" size={16} /> : null}
+            {tab === 'transfer' ? <MdSwapHoriz className="inline mr-1 md:mr-2" size={14} /> : null}
             {t(tab)}
           </button>
         ))}
       </div>
 
-      <div className="flex items-center gap-4 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-6">
-        <div className={`p-3 rounded-2xl shadow-lg ${editingTransaction ? 'bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 shadow-emerald-500/20'} text-white`}>
-          {activeTab === 'transfer' ? <MdSwapHoriz size={24} /> : (editingTransaction ? <MdSave size={24} /> : <MdAdd size={24} />)}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6 md:mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4 md:pb-6">
+        <div className={`p-2.5 md:p-3 rounded-2xl shadow-lg flex-shrink-0 ${editingTransaction ? 'bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 shadow-emerald-500/20'} text-white`}>
+          {activeTab === 'transfer' ? <MdSwapHoriz size={20} /> : (editingTransaction ? <MdSave size={20} /> : <MdAdd size={20} />)}
         </div>
-        <div>
-          <h2 className="text-xl font-black text-zinc-800 dark:text-white mb-0">
+        <div className="min-w-0">
+          <h2 className="text-lg md:text-xl font-black text-zinc-800 dark:text-white mb-0">
             {activeTab === 'transfer' ? t('transfer') : (editingTransaction ? t('edit_transaction') : t('new_transaction'))}
           </h2>
-          <p className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] md:text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
             {activeTab === 'transfer' ? 'Luân chuyển tiền giữa các ví' : (editingTransaction ? 'Cập nhật thông tin cũ' : 'Thêm khoản thu chi mới')}
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
         {/* Amount */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('amount')}</label>
+        <div className="space-y-2 md:space-y-2.5">
+          <label className="text-[9px] md:text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('amount')}</label>
           <div className="relative group">
             <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-zinc-400 dark:text-zinc-500 group-focus-within:text-emerald-500 transition-colors">₫</span>
             <input
@@ -186,7 +186,7 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
         </div>
 
         {activeTab !== 'transfer' ? (
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             {/* Wallet Selection */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('wallets')}</label>
@@ -214,7 +214,7 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             {/* From Wallet */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('from_wallet')}</label>
@@ -245,7 +245,7 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">{t('date')}</label>
             <input

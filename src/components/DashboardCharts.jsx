@@ -129,23 +129,23 @@ const DashboardCharts = ({ transactions, selectedDate }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div className="card h-[450px] p-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+      <div className="card h-[350px] md:h-[450px] p-4 md:p-8">
         <Bar data={barData} options={barOptions} />
       </div>
-      <div className="card h-[450px] p-8">
+      <div className="card h-[350px] md:h-[450px] p-4 md:p-8">
         <div className="flex flex-col h-full">
           <div className="flex-1 min-h-0 relative">
             <Doughnut data={donutData} options={donutOptions} />
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-8">
-              <span className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{t('total_expense')}</span>
-              <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-6 md:pt-8">
+              <span className="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">{t('total_expense')}</span>
+              <span className="text-xl md:text-2xl font-black text-slate-800 dark:text-white tracking-tighter line-clamp-2">
                 {new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(totalExpense)}
               </span>
             </div>
           </div>
           
-          <div className="mt-8 space-y-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="mt-4 md:mt-8 space-y-2 md:space-y-4 max-h-32 md:max-h-40 overflow-y-auto pr-2 custom-scrollbar\">
             {sortedCategories.map(([cat, amount], idx) => {
               const percentage = ((amount / totalExpense) * 100).toFixed(1);
               const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-violet-500', 'bg-pink-500', 'bg-cyan-500', 'bg-slate-500'];

@@ -21,7 +21,9 @@ const Sidebar = ({
   setActivePage,
   wallets,
   activeWalletId,
-  setActiveWalletId
+  setActiveWalletId,
+  sidebarOpen,
+  setSidebarOpen
 }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -45,7 +47,9 @@ const Sidebar = ({
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col transition-all duration-300 z-50">
+    <aside className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col transition-all duration-300 z-40 lg:static lg:translate-x-0 lg:border-r lg:p-0 ${
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    }`}>
       <div className="p-6 flex flex-col items-center overflow-y-auto h-full">
         <h1 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-8 tracking-tighter">{t('app_name')}</h1>
         
@@ -73,7 +77,10 @@ const Sidebar = ({
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActivePage(item.id)}
+              onClick={() => {
+                setActivePage(item.id);
+                setSidebarOpen(false);
+              }}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${
                 activePage === item.id
                   ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20'

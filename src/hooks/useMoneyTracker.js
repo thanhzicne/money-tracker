@@ -9,7 +9,8 @@ import {
   deleteDoc, 
   doc, 
   setDoc,
-  getDoc
+  getDoc,
+  or
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './useAuth';
@@ -26,6 +27,9 @@ export const useMoneyTracker = () => {
   const [wallets, setWallets] = useState([]);
   const [activeWalletId, setActiveWalletId] = useState('all');
   const [savingsGoal, setSavingsGoal] = useState(5000000);
+  const [budgets, setBudgets] = useState([]);
+  const [debts, setDebts] = useState([]);
+  const [investments, setInvestments] = useState([]);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -50,7 +54,10 @@ export const useMoneyTracker = () => {
     // 1. Transactions Sync
     const qTransactions = query(
       collection(db, 'transactions'), 
-      where('userId', '==', user.uid)
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
     );
 
     const unsubTransactions = onSnapshot(qTransactions, (snapshot) => {
@@ -68,7 +75,10 @@ export const useMoneyTracker = () => {
     // 2. Wallets Sync
     const qWallets = query(
       collection(db, 'wallets'),
-      where('userId', '==', user.uid)
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
     );
 
     const unsubWallets = onSnapshot(qWallets, (snapshot) => {
@@ -77,6 +87,57 @@ export const useMoneyTracker = () => {
         id: doc.id
       }));
       setWallets(data);
+    });
+
+    // 3. Budgets Sync
+    const qBudgets = query(
+      collection(db, 'budgets'),
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
+    );
+
+    const unsubBudgets = onSnapshot(qBudgets, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setBudgets(data);
+    });
+
+    // 4. Debts Sync
+    const qDebts = query(
+      collection(db, 'debts'),
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
+    );
+
+    const unsubDebts = onSnapshot(qDebts, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setDebts(data);
+    });
+
+    // 5. Investments Sync
+    const qInvestments = query(
+      collection(db, 'investments'),
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
+    );
+
+    const unsubInvestments = onSnapshot(qInvestments, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setInvestments(data);
     });
 
     // Fetch user settings (savings goal)
@@ -96,6 +157,9 @@ export const useMoneyTracker = () => {
       clearTimeout(timer);
       unsubTransactions();
       unsubWallets();
+      unsubBudgets();
+      unsubDebts();
+      unsubInvestments();
     };
   }, [user]);
 
@@ -127,6 +191,7 @@ export const useMoneyTracker = () => {
           date: newDate.toISOString().split('T')[0],
           parentRecurringId: template.id,
           userId: uid, // Ensure userId is passed
+          memberEmails: template.memberEmails || [user.email],
           createdAt: new Date().toISOString(),
         });
       }
@@ -192,6 +257,13 @@ export const useMoneyTracker = () => {
     return initialSum + transactionsSum;
   }, [transactions, wallets, activeWalletId]);
 
+  const netWorth = useMemo(() => {
+    const investSum = investments.reduce((sum, i) => sum + Number(i.currentValue || i.initialValue || 0), 0);
+    const loanSum = debts.filter(d => d.type === 'loan').reduce((sum, d) => sum + (d.totalAmount - (d.paidAmount || 0)), 0);
+    const borrowSum = debts.filter(d => d.type === 'borrow').reduce((sum, d) => sum + (d.totalAmount - (d.paidAmount || 0)), 0);
+    return totalBalance + investSum + loanSum - borrowSum;
+  }, [totalBalance, investments, debts]);
+
   const savingsProgress = useMemo(() => {
     if (savingsGoal <= 0) return 0;
     const progress = (totalBalance / savingsGoal) * 100;
@@ -201,9 +273,52 @@ export const useMoneyTracker = () => {
   // --- ACTIONS ---
   const addTransaction = async (t) => {
     if (!user) return;
+    
+    // Budget & large transaction warning logic
+    if (t.type === 'expense') {
+      const amount = Number(t.amount);
+      if (amount >= 5000000) {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Giao dịch Lớn", { body: `Bạn vừa ghi nhận một khoản chi khá lớn (${amount.toLocaleString()}đ)` });
+        }
+      }
+
+      // Check budget threshold
+      const month = t.date.slice(0, 7); // YYYY-MM
+      const relatedBudget = budgets.find(b => b.category === t.category && b.month === month);
+      
+      if (relatedBudget) {
+        const currentSpent = transactions
+          .filter(tx => tx.type === 'expense' && tx.category === t.category && tx.date.startsWith(month))
+          .reduce((sum, tx) => sum + Number(tx.amount), 0);
+        
+        const newSpent = currentSpent + amount;
+        const limit80 = relatedBudget.amount * 0.8;
+        
+        let alertMsg = '';
+        if (newSpent > relatedBudget.amount && currentSpent <= relatedBudget.amount) {
+          alertMsg = `CẢNH BÁO: Đã vượt 100% ngân sách cho "${t.category}" tháng này!`;
+        } else if (newSpent >= limit80 && currentSpent < limit80) {
+          alertMsg = `CẢNH BÁO: Bạn đã dùng hơn 80% ngân sách cho "${t.category}" tháng này!`;
+        }
+        
+        if (alertMsg) {
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Cảnh báo Ngân sách", { body: alertMsg });
+          } else {
+            alert(alertMsg);
+          }
+        }
+      }
+    }
+
+    const wallet = wallets.find(w => w.id === t.walletId);
+    const memberEmails = wallet?.memberEmails || [user.email];
+
     await addDoc(collection(db, 'transactions'), {
       ...t,
       userId: user.uid,
+      memberEmails,
       createdAt: new Date().toISOString()
     });
   };
@@ -226,6 +341,7 @@ export const useMoneyTracker = () => {
       walletId: fromWalletId,
       walletName: fromWallet?.name,
       userId: user.uid,
+      memberEmails: fromWallet?.memberEmails || [user.email],
       transferGroupId,
       createdAt: new Date().toISOString()
     });
@@ -240,6 +356,7 @@ export const useMoneyTracker = () => {
       walletId: toWalletId,
       walletName: toWallet?.name,
       userId: user.uid,
+      memberEmails: toWallet?.memberEmails || [user.email],
       transferGroupId,
       createdAt: new Date().toISOString()
     });
@@ -261,6 +378,7 @@ export const useMoneyTracker = () => {
     await addDoc(collection(db, 'wallets'), {
       ...wallet,
       userId: user.uid,
+      memberEmails: [user.email],
       createdAt: new Date().toISOString()
     });
   };
@@ -287,6 +405,69 @@ export const useMoneyTracker = () => {
     setSelectedDate(nextDate);
   };
 
+  const addBudget = async (budget) => {
+    if (!user) return;
+    await addDoc(collection(db, 'budgets'), {
+      ...budget,
+      userId: user.uid,
+      memberEmails: [user.email],
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  const updateBudget = async (updated) => {
+    if (!user) return;
+    const { id, ...data } = updated;
+    await updateDoc(doc(db, 'budgets', id), data);
+  };
+
+  const deleteBudget = async (id) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'budgets', id));
+  };
+
+  const addDebt = async (debt) => {
+    if (!user) return;
+    await addDoc(collection(db, 'debts'), {
+      ...debt,
+      userId: user.uid,
+      memberEmails: [user.email],
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  const updateDebt = async (updated) => {
+    if (!user) return;
+    const { id, ...data } = updated;
+    await updateDoc(doc(db, 'debts', id), data);
+  };
+
+  const deleteDebt = async (id) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'debts', id));
+  };
+
+  const addInvestment = async (inv) => {
+    if (!user) return;
+    await addDoc(collection(db, 'investments'), {
+      ...inv,
+      userId: user.uid,
+      memberEmails: [user.email],
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  const updateInvestment = async (updated) => {
+    if (!user) return;
+    const { id, ...data } = updated;
+    await updateDoc(doc(db, 'investments', id), data);
+  };
+
+  const deleteInvestment = async (id) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'investments', id));
+  };
+
   return {
     transactions,
     filteredTransactions,
@@ -308,6 +489,19 @@ export const useMoneyTracker = () => {
     addTransfer,
     updateTransaction,
     deleteTransaction,
+    budgets,
+    addBudget,
+    updateBudget,
+    deleteBudget,
+    debts,
+    addDebt,
+    updateDebt,
+    deleteDebt,
+    investments,
+    addInvestment,
+    updateInvestment,
+    deleteInvestment,
+    netWorth,
     loading
   };
 };

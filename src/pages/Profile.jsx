@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
-import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars } from 'react-icons/md';
+import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars, MdSecurityUpdateGood, MdTrendingUp, MdSavings } from 'react-icons/md';
 
-const Profile = ({ transactionsCount, totalBalance }) => {
+const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProgress }) => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
 
@@ -22,6 +22,36 @@ const Profile = ({ transactionsCount, totalBalance }) => {
       year: 'numeric' 
     });
   };
+
+  const calculateHealthScore = () => {
+    let score = 0;
+    
+    // 1. Income vs Expense (Max 40)
+    if (stats.expense === 0 && stats.income > 0) score += 40;
+    else if (stats.income > 0) {
+      const ratio = stats.income / stats.expense;
+      if (ratio >= 1.5) score += 40;
+      else if (ratio >= 1.1) score += 30;
+      else if (ratio >= 1.0) score += 20;
+      else score += 10;
+    }
+
+    // 2. Savings Progress (Max 30)
+    score += (savingsProgress * 0.3);
+
+    // 3. Net Worth (Max 30)
+    if (netWorth > 50000000) score += 30;
+    else if (netWorth > 10000000) score += 20;
+    else if (netWorth > 0) score += 10;
+
+    return Math.min(Math.round(score), 100);
+  };
+
+  const healthScore = calculateHealthScore();
+  let scoreColor = 'text-emerald-500';
+  let scoreBg = 'bg-emerald-100';
+  if (healthScore < 50) { scoreColor = 'text-rose-500'; scoreBg = 'bg-rose-100'; }
+  else if (healthScore < 80) { scoreColor = 'text-amber-500'; scoreBg = 'bg-amber-100'; }
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -74,6 +104,53 @@ const Profile = ({ transactionsCount, totalBalance }) => {
                 <MdDateRange size={20} className="text-blue-500" />
                 {formatDate(user?.metadata.creationTime)}
               </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card p-8 bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 border-2 border-indigo-100 dark:border-slate-700">
+        <h2 className="text-xl font-black text-indigo-800 dark:text-indigo-400 mb-6 flex items-center gap-2">
+          <MdStars size={28} /> Điểm Sức Khỏe Tài Chính
+        </h2>
+        
+        <div className="flex flex-col md:flex-row items-center gap-8 border-b-2 border-indigo-100 dark:border-slate-700 pb-8 mb-8">
+          <div className="w-48 h-48 rounded-full border-8 border-indigo-100 dark:border-slate-700 flex flex-col items-center justify-center relative shadow-inner bg-white dark:bg-slate-800">
+            <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+              <circle cx="88" cy="88" r="80" className="text-transparent stroke-current" strokeWidth="16" fill="none" />
+              <circle cx="88" cy="88" r="80" className={`${scoreColor} stroke-current transition-all duration-1000 ease-out`} strokeWidth="16" strokeDasharray={`${healthScore * 5.02} 502`} strokeLinecap="round" fill="none" />
+            </svg>
+            <span className={`text-5xl font-black ${scoreColor} drop-shadow-sm z-10`}>{healthScore}</span>
+            <span className="text-xs font-bold text-slate-400 mt-1 z-10 uppercase tracking-widest">/ 100</span>
+          </div>
+
+          <div className="flex-1 space-y-4 w-full">
+            <h3 className="text-lg font-black text-slate-700 dark:text-white uppercase">Huy hiệu đạt được</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {savingsProgress >= 100 && (
+                <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg text-emerald-600 dark:text-emerald-400"><MdSavings size={20} /></div>
+                  <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">Cao thủ Tiết kiệm</span>
+                </div>
+              )}
+              {stats.income > stats.expense && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg text-blue-600 dark:text-blue-400"><MdSecurityUpdateGood size={20} /></div>
+                  <span className="font-bold text-sm text-blue-700 dark:text-blue-400">Kiểm soát dòng tiền</span>
+                </div>
+              )}
+              {netWorth > 0 && (
+                <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/50">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg text-purple-600 dark:text-purple-400"><MdTrendingUp size={20} /></div>
+                  <span className="font-bold text-sm text-purple-700 dark:text-purple-400">Tài sản Dương</span>
+                </div>
+              )}
+              {transactionsCount >= 50 && (
+                <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800/50">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg text-amber-600 dark:text-amber-400"><MdStars size={20} /></div>
+                  <span className="font-bold text-sm text-amber-700 dark:text-amber-400">Ghi chép chăm chỉ</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

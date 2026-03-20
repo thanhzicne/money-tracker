@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MdAdd, MdAccountBalanceWallet, MdMoreVert, MdDelete, MdEdit, MdCheck, MdCancel } from 'react-icons/md';
+import { MdAdd, MdAccountBalanceWallet, MdMoreVert, MdDelete, MdEdit, MdCheck, MdCancel, MdPersonAdd } from 'react-icons/md';
 
 const Wallets = ({ wallets, addWallet, updateWallet, deleteWallet, totalBalance, transactions }) => {
   const { t } = useTranslation();
@@ -60,6 +60,22 @@ const Wallets = ({ wallets, addWallet, updateWallet, deleteWallet, totalBalance,
         await deleteWallet(id);
       } catch (error) {
         alert(t('cannot_delete_wallet'));
+      }
+    }
+  };
+
+  const handleShare = (wallet) => {
+    const email = window.prompt(t('share_wallet_prompt', 'Nhập email người bạn muốn chia sẻ ví này:'));
+    if (email && email.trim() !== '') {
+      const currentMembers = wallet.memberEmails || [];
+      if (!currentMembers.includes(email.trim().toLowerCase())) {
+        updateWallet({ 
+          ...wallet, 
+          memberEmails: [...currentMembers, email.trim().toLowerCase()] 
+        });
+        alert(`Đã chia sẻ ví thành công cho ${email}`);
+      } else {
+        alert('Email này đã có trong danh sách chia sẻ!');
       }
     }
   };
@@ -183,6 +199,13 @@ const Wallets = ({ wallets, addWallet, updateWallet, deleteWallet, totalBalance,
               <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: wallet.color || '#10b981' }}></div>
               <div className="absolute top-0 right-0 p-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
+                  onClick={() => handleShare(wallet)}
+                  className="p-2 text-zinc-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all"
+                  title="Chia sẻ ví"
+                >
+                  <MdPersonAdd size={18} />
+                </button>
+                <button 
                   onClick={() => handleEdit(wallet)}
                   className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"
                 >
@@ -203,6 +226,11 @@ const Wallets = ({ wallets, addWallet, updateWallet, deleteWallet, totalBalance,
                 <div>
                   <h3 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight">{wallet.name}</h3>
                   <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">{wallet.type || 'Standard'}</p>
+                  {wallet.memberEmails && wallet.memberEmails.length > 1 && (
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-[9px] font-bold text-zinc-500 rounded-full">
+                      👥 {wallet.memberEmails.length} thành viên
+                    </span>
+                  )}
                 </div>
               </div>
 

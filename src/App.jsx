@@ -4,6 +4,9 @@ import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import Wallets from './pages/Wallets';
+import Budgeting from './pages/Budgeting';
+import Debts from './pages/Debts';
+import Investments from './pages/Investments';
 import Login from './pages/Login';
 import { useMoneyTracker } from './hooks/useMoneyTracker';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -41,11 +44,46 @@ function AppContent() {
             transactions={tracker.transactions}
           />
         );
+      case 'budgeting':
+        return (
+          <Budgeting 
+            budgets={tracker.budgets}
+            addBudget={tracker.addBudget}
+            updateBudget={tracker.updateBudget}
+            deleteBudget={tracker.deleteBudget}
+            transactions={tracker.transactions}
+            selectedDate={tracker.selectedDate}
+          />
+        );
+      case 'debts':
+        return (
+          <Debts 
+            debts={tracker.debts}
+            addDebt={tracker.addDebt}
+            updateDebt={tracker.updateDebt}
+            deleteDebt={tracker.deleteDebt}
+            wallets={tracker.wallets}
+            addTransaction={tracker.addTransaction}
+          />
+        );
+      case 'investments':
+        return (
+          <Investments 
+            investments={tracker.investments}
+            addInvestment={tracker.addInvestment}
+            updateInvestment={tracker.updateInvestment}
+            deleteInvestment={tracker.deleteInvestment}
+            netWorth={tracker.netWorth}
+          />
+        );
       case 'profile':
         return (
           <Profile 
             transactionsCount={tracker.transactions.length}
             totalBalance={tracker.totalBalance}
+            netWorth={tracker.netWorth}
+            stats={tracker.stats}
+            savingsProgress={tracker.savingsProgress}
           />
         );
       default:

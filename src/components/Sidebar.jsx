@@ -9,7 +9,10 @@ import {
   MdPerson,
   MdLogout,
   MdAccountBalanceWallet,
-  MdTranslate
+  MdTranslate,
+  MdPieChart,
+  MdPayments,
+  MdTrendingUp
 } from 'react-icons/md';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
@@ -39,6 +42,9 @@ const Sidebar = ({
     { id: 'dashboard', label: t('dashboard'), icon: <MdDashboard size={20} /> },
     { id: 'analytics', label: t('analytics'), icon: <MdAnalytics size={20} /> },
     { id: 'wallets', label: t('wallets'), icon: <MdAccountBalanceWallet size={20} /> },
+    { id: 'budgeting', label: t('budget_title', 'Ngân sách'), icon: <MdPieChart size={20} /> },
+    { id: 'debts', label: t('debts_title', 'Sổ Nợ'), icon: <MdPayments size={20} /> },
+    { id: 'investments', label: t('invest_title', 'Đầu tư'), icon: <MdTrendingUp size={20} /> },
     { id: 'profile', label: t('profile'), icon: <MdPerson size={20} /> },
   ];
 

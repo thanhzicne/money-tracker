@@ -100,6 +100,10 @@ function AppContent() {
       changeMonth={tracker.changeMonth}
       activePage={activePage}
       setActivePage={setActivePage}
+      wallets={tracker.wallets}
+      activeWalletId={tracker.activeWalletId}
+      setActiveWalletId={tracker.setActiveWalletId}
+      budgets={tracker.budgets}
     >
       {tracker.loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">

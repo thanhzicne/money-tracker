@@ -204,7 +204,7 @@ const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProg
         </div>
       </div>
 
-      <div className="card p-8">
+      <div className="hidden">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
           <MdPerson className="text-blue-500" size={24} />
           {t('account_info')}

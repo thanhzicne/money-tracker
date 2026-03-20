@@ -37,6 +37,7 @@ const Layout = ({ children, ...props }) => {
               activeWalletId={props.activeWalletId} 
               setActiveWalletId={props.setActiveWalletId}
               activePage={props.activePage}
+              budgets={props.budgets}
             />
             {children}
           </div>

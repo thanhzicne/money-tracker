@@ -27,6 +27,7 @@ export const useMoneyTracker = () => {
   const [wallets, setWallets] = useState([]);
   const [activeWalletId, setActiveWalletId] = useState('all');
   const [savingsGoal, setSavingsGoal] = useState(5000000);
+  const [emailReport, setEmailReport] = useState(false);
   const [budgets, setBudgets] = useState([]);
   const [debts, setDebts] = useState([]);
   const [investments, setInvestments] = useState([]);
@@ -143,12 +144,18 @@ export const useMoneyTracker = () => {
     // Fetch user settings (savings goal)
     const fetchSettings = async () => {
       try {
-        const settingsDoc = await getDoc(doc(db, 'settings', user.uid));
-        if (settingsDoc.exists()) {
-          setSavingsGoal(settingsDoc.data().savingsGoal);
+        const docRef = doc(db, 'settings', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setSavingsGoal(data.savingsGoal || 5000000);
+          setEmailReport(data.emailReport || false);
+        } else {
+          // Initialize settings for new user
+          await setDoc(docRef, { savingsGoal: 5000000, emailReport: false, userEmail: user.email });
         }
       } catch (error) {
-        console.error("Error fetching settings:", error);
+        console.error("Error fetching settings: ", error);
       }
     };
     fetchSettings();
@@ -199,9 +206,25 @@ export const useMoneyTracker = () => {
   };
 
   const updateSavingsGoal = async (newGoal) => {
-    setSavingsGoal(newGoal);
-    if (user) {
+    if (!user) return;
+    try {
+      setSavingsGoal(newGoal);
       await setDoc(doc(db, 'settings', user.uid), { savingsGoal: newGoal }, { merge: true });
+    } catch (error) {
+      console.error("Error updating savings goal: ", error);
+    }
+  };
+
+  const updateEmailReportSetting = async (enabled) => {
+    if (!user) return;
+    try {
+      setEmailReport(enabled);
+      await setDoc(doc(db, 'settings', user.uid), { 
+        emailReport: enabled,
+        userEmail: user.email 
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error updating email report setting: ", error);
     }
   };
 
@@ -502,6 +525,8 @@ export const useMoneyTracker = () => {
     updateInvestment,
     deleteInvestment,
     netWorth,
+    emailReport,
+    updateEmailReportSetting,
     loading
   };
 };

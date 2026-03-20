@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
-import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars, MdSecurityUpdateGood, MdTrendingUp, MdSavings } from 'react-icons/md';
+import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars, MdSecurityUpdateGood, MdTrendingUp, MdSavings, MdLocalFireDepartment, MdOutlineMail } from 'react-icons/md';
 
-const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProgress }) => {
+const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProgress, transactions = [], emailReport, updateEmailReportSetting }) => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
 
@@ -44,6 +44,28 @@ const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProg
     else if (netWorth > 10000000) score += 20;
     else if (netWorth > 0) score += 10;
 
+    // 4. Consecutive Savings (Max 20)
+    let consecutiveSavings = 0;
+    if (transactions.length > 0) {
+      const monthlyStats = {};
+      transactions.forEach(t => {
+        const date = new Date(t.date);
+        const key = `${date.getFullYear()}-${date.getMonth()}`;
+        if (!monthlyStats[key]) monthlyStats[key] = { income: 0, expense: 0 };
+        monthlyStats[key][t.type] += Number(t.amount);
+      });
+      const sortedMonths = Object.keys(monthlyStats).sort((a, b) => {
+        const [yA, mA] = a.split('-');
+        const [yB, mB] = b.split('-');
+        return new Date(yB, mB) - new Date(yA, mA);
+      });
+      for (const month of sortedMonths) {
+        if (monthlyStats[month].income > monthlyStats[month].expense) consecutiveSavings++;
+        else break;
+      }
+    }
+    score += Math.min(consecutiveSavings * 5, 20);
+
     return Math.min(Math.round(score), 100);
   };
 
@@ -52,6 +74,26 @@ const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProg
   let scoreBg = 'bg-emerald-100';
   if (healthScore < 50) { scoreColor = 'text-rose-500'; scoreBg = 'bg-rose-100'; }
   else if (healthScore < 80) { scoreColor = 'text-amber-500'; scoreBg = 'bg-amber-100'; }
+
+  let consecutiveMonths = 0;
+  if (transactions && transactions.length > 0) {
+    const monthlyStats = {};
+    transactions.forEach(t => {
+      const date = new Date(t.date);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (!monthlyStats[key]) monthlyStats[key] = { income: 0, expense: 0 };
+      monthlyStats[key][t.type] += Number(t.amount);
+    });
+    const sortedMonths = Object.keys(monthlyStats).sort((a, b) => {
+      const [yA, mA] = a.split('-');
+      const [yB, mB] = b.split('-');
+      return new Date(yB, mB) - new Date(yA, mA);
+    });
+    for (const month of sortedMonths) {
+      if (monthlyStats[month].income > monthlyStats[month].expense) consecutiveMonths++;
+      else break;
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -151,6 +193,12 @@ const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProg
                   <span className="font-bold text-sm text-amber-700 dark:text-amber-400">Ghi chép chăm chỉ</span>
                 </div>
               )}
+              {consecutiveMonths >= 3 && (
+                <div className="flex items-center gap-3 p-3 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-100 dark:border-rose-800/50 col-span-1 sm:col-span-2">
+                  <div className="p-2 bg-rose-100 dark:bg-rose-800 rounded-lg text-rose-600 dark:text-rose-400"><MdLocalFireDepartment size={20} /></div>
+                  <span className="font-bold text-sm text-rose-700 dark:text-rose-400">Chuỗi tiết kiệm ({consecutiveMonths} tháng liên tiếp) 🔥</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -182,6 +230,27 @@ const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProg
           </div>
         </div>
       </div>
+
+      <div className="card p-8 mt-8">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
+          <MdOutlineMail className="text-blue-500" size={24} />
+          Đăng ký Báo cáo Tự động
+        </h2>
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-100 dark:border-slate-700">
+          <div>
+            <h4 className="font-bold text-gray-800 dark:text-white">Gửi Báo cáo hàng tháng (PDF)</h4>
+            <p className="text-xs text-gray-500">Nhận báo cáo tổng hợp chi tiêu tài chính định kỳ vào cuối tháng qua Email.</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" checked={emailReport} onChange={(e) => updateEmailReportSetting(e.target.checked)} />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-blue-500"></div>
+          </label>
+        </div>
+        {emailReport && (
+          <p className="text-[10px] text-blue-500 mt-3 italic">* Hệ thống Backend (Firebase Cloud Functions) sẽ tự động quét trạng thái này và gửi báo cáo tổng hợp vào lúc 9:00 sáng mùng 1 hàng tháng qua hòm thư của bạn.</p>
+        )}
+      </div>
+
     </div>
   );
 };

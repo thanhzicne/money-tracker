@@ -9,7 +9,9 @@ import {
   Legend 
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { MdTrendingUp, MdTrendingDown } from 'react-icons/md';
+import { MdTrendingUp, MdTrendingDown, MdPictureAsPdf } from 'react-icons/md';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -105,8 +107,81 @@ const Analytics = ({ transactions, selectedDate }) => {
     return date.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit' });
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // jsPDF mặc định không hỗ trợ bộ mã Unicode. 
+    // FormatCurrency của JS chứa ký tự khoảng trắng đặc biệt (No-break space) và ký hiệu ₫ (U+20AB) gây lỗi font "&".
+    // Giải pháp: Loại bỏ hoàn toàn dấu tiếng Việt và XÓA SẠCH những byte không nằm trong bảng chuẩn ASCII.
+    const cleanString = (str) => {
+      if (!str) return '';
+      let s = str.toString();
+      // Chuyển ký hiệu tiền tệ
+      s = s.replace(/₫/g, 'VND').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+      // Tách và loại bỏ dấu tiếng Việt
+      s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      // Triệt tiêu mọi khoảng trắng ẩn & ký tự Unicode không hiển thị được
+      s = s.replace(/[^\x20-\x7E]/g, ' '); 
+      return s.trim();
+    };
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    // Gõ text Tiếng Việt không dấu trực tiếp luôn để bớt phụ thuộc vào file script encoding.
+    doc.text(`Bao Cao Tai Chinh - Nam ${currentYear}`, 14, 22);
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Ngay xuat bao cao: ${new Date().toLocaleDateString('vi-VN')}`, 14, 30);
+
+    const totalInc = yearlyIncome.reduce((a, b) => a + b, 0);
+    const totalExp = yearlyExpense.reduce((a, b) => a + b, 0);
+    const saved = totalInc - totalExp;
+
+    doc.text(`Tong Thu Nhap: ${cleanString(formatCurrency(totalInc))}`, 14, 40);
+    doc.text(`Tong Chi Tieu: ${cleanString(formatCurrency(totalExp))}`, 14, 48);
+    doc.text(`Tiet Kiem Duoc: ${cleanString(formatCurrency(saved))}`, 14, 56);
+
+    const tableData = transactions
+      .filter(t => new Date(t.date).getFullYear() === currentYear)
+      .sort((a,b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 40)
+      .map(t => [
+        cleanString(formatDate(t.date)),
+        cleanString(t.category),
+        t.type === 'income' ? 'Thu' : 'Chi',
+        cleanString(formatCurrency(t.amount))
+      ]);
+
+    autoTable(doc, {
+      startY: 65,
+      head: [['Ngay', 'Danh muc', 'Loai', 'So tien']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [16, 185, 129] }
+    });
+
+    doc.save(`Bao_Cao_Tai_Chinh_${currentYear}.pdf`);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">Báo Cáo Phân Tích</h1>
+          <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-1">
+            Năm {currentYear}
+          </p>
+        </div>
+        <button 
+          onClick={handleExportPDF}
+          className="btn-primary flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-xl shadow-emerald-500/20"
+        >
+          <MdPictureAsPdf size={20} />
+          Xuất PDF
+        </button>
+      </div>
+
       {/* Yearly Summary Chart */}
       <section className="card h-112.5">
         <Bar data={yearlyBarData} options={yearlyBarOptions} />

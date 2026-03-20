@@ -84,6 +84,9 @@ function AppContent() {
             netWorth={tracker.netWorth}
             stats={tracker.stats}
             savingsProgress={tracker.savingsProgress}
+            transactions={tracker.transactions}
+            emailReport={tracker.emailReport}
+            updateEmailReportSetting={tracker.updateEmailReportSetting}
           />
         );
       default:

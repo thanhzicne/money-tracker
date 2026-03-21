@@ -11,7 +11,7 @@ import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYz_HmPacrfny5HMCCbp_54dJexqY5qD4",
-  authDomain: "money-tracker-f8886.firebaseapp.com",
+  authDomain: window.location.hostname || "money-tracker-f8886.firebaseapp.com",
   projectId: "money-tracker-f8886",
   storageBucket: "money-tracker-f8886.firebasestorage.app",
   messagingSenderId: "951180184572",

@@ -5,6 +5,15 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      '/__/auth': {
+        target: 'https://money-tracker-f8886.firebaseapp.com',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
+  },
   plugins: [
     react(), 
     tailwindcss(),

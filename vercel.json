@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/__/auth/(.*)",
+      "destination": "https://money-tracker-f8886.firebaseapp.com/__/auth/$1"
+    }
+  ]
+}

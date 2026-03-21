@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 transition-colors font-sans overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:text-emerald-100">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 transition-colors font-sans selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:text-emerald-100">
       {/* Dynamic Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] left-[10%] w-[30vw] h-[30vw] bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-[100px] animate-float" style={{ animationDelay: '0s' }}></div>
@@ -84,10 +84,10 @@ const Login = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] border border-zinc-200/10 dark:border-zinc-800/10 rounded-full"></div>
       </div>
 
-      <div className="max-w-6xl w-full flex glass rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 animate-fade-in border-white/40 dark:border-zinc-800/50">
+      <div className="max-w-6xl w-full flex glass rounded-[2.5rem] shadow-2xl relative z-10 animate-fade-in border-white/40 dark:border-zinc-800/50">
         
         {/* Left Side: Hero (Desktop Only) */}
-        <div className="hidden lg:flex w-5/12 bg-zinc-900 dark:bg-zinc-950 relative overflow-hidden p-12 flex-col justify-between text-white">
+        <div className="hidden lg:flex w-5/12 bg-zinc-900 dark:bg-zinc-950 rounded-l-[2.5rem] relative overflow-hidden p-12 flex-col justify-between text-white">
           <div className="absolute inset-0 opacity-40">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500 rounded-full blur-[120px]"></div>
             <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600 rounded-full blur-[120px]"></div>
@@ -126,7 +126,7 @@ const Login = () => {
         </div>
 
         {/* Right Side: Form Content */}
-        <div className="w-full lg:w-7/12 p-8 md:p-14 lg:p-20 flex flex-col justify-center bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md">
+        <div className="w-full lg:w-7/12 p-8 md:p-14 lg:p-20 flex flex-col justify-center bg-white/40 dark:bg-zinc-900/40 rounded-[2.5rem] lg:rounded-l-none backdrop-blur-md">
           
           {/* Logo for mobile */}
           <div className="lg:hidden flex flex-col items-center mb-10 animate-fade-in">

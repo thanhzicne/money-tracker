@@ -56,9 +56,13 @@ export const AuthProvider = ({ children }) => {
       /Safari/i.test(ua) &&
       !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(ua);
 
-    // Mobile/Safari: ưu tiên redirect + session persistence để ổn định sau vòng OAuth.
+    // Mobile/Safari: ưu tiên redirect + local persistence để ổn định sau vòng OAuth.
     if (isMobile || isSafari) {
-      await setPersistence(auth, browserSessionPersistence);
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+      } catch {
+        await setPersistence(auth, browserSessionPersistence);
+      }
       return signInWithRedirect(auth, googleProvider);
     }
 

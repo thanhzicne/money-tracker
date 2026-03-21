@@ -347,9 +347,9 @@ const Login = () => {
               <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full h-14 glass rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-all hover:shadow-lg active:scale-[0.98]"
+                className="w-full h-14 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 bg-red-500 text-white hover:bg-red-600 transition-all hover:shadow-lg active:scale-[0.98]"
               >
-                <FaGoogle className="text-emerald-500" size={20} />
+                <FaGoogle className="text-white" size={20} />
                 Tiếp tục bằng Google
               </button>
 

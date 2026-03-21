@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 transition-colors font-sans overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:text-emerald-100">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 transition-colors font-sans overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:text-emerald-100">
       {/* Dynamic Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] left-[10%] w-[30vw] h-[30vw] bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-[100px] animate-float" style={{ animationDelay: '0s' }}></div>

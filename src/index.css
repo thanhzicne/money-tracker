@@ -24,7 +24,8 @@
   }
   
   .input-field {
-    @apply w-full px-5 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all dark:text-white placeholder:text-zinc-400;
+    @apply w-full px-5 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all dark:text-white placeholder:text-zinc-400 text-base md:text-sm;
+    touch-action: manipulation;
   }
   
   .btn-primary {

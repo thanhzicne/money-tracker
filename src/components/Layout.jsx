@@ -6,18 +6,18 @@ import { MdMenuOpen, MdClose, MdKeyboardArrowUp } from 'react-icons/md';
 const Layout = ({ children, ...props }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const mainRef = useRef(null);
 
-  const handleScroll = () => {
-    if (mainRef.current) {
-      setShowScrollTop(mainRef.current.scrollTop > 300);
-    }
-  };
+  React.useEffect(() => {
+    const handleScroll = () => {
+      // Vì Layout linh hoạt nên thanh cuộn thường nằm ở window (trình duyệt)
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToTop = () => {
-    if (mainRef.current) {
-      mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -30,11 +30,7 @@ const Layout = ({ children, ...props }) => {
         />
       )}
       <Sidebar {...props} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main 
-        ref={mainRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto bg-transparent w-full transition-all duration-300"
-      >
+      <main className="flex-1 overflow-y-auto bg-transparent w-full transition-all duration-300">
         <div className="p-4 md:p-6 lg:p-8 w-full">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6 lg:hidden">

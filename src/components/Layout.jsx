@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { MdMenuOpen, MdClose } from 'react-icons/md';
+import { MdMenuOpen, MdClose, MdKeyboardArrowUp } from 'react-icons/md';
 
 const Layout = ({ children, ...props }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const mainRef = useRef(null);
+
+  const handleScroll = () => {
+    if (mainRef.current) {
+      setShowScrollTop(mainRef.current.scrollTop > 300);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -16,13 +30,18 @@ const Layout = ({ children, ...props }) => {
         />
       )}
       <Sidebar {...props} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <main className="flex-1 overflow-y-auto bg-transparent w-full transition-all duration-300">
+      <main 
+        ref={mainRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto bg-transparent w-full transition-all duration-300"
+      >
         <div className="p-4 md:p-6 lg:p-8 w-full">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6 lg:hidden">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+                aria-label="Open Menu"
               >
                 {sidebarOpen ? (
                   <MdClose size={24} className="text-zinc-800 dark:text-white" />
@@ -42,6 +61,17 @@ const Layout = ({ children, ...props }) => {
             {children}
           </div>
         </div>
+        
+        {/* Nút cuộn lên đầu trang */}
+        <button
+          onClick={scrollToTop}
+          className={`fixed bottom-8 right-6 md:bottom-10 md:right-10 p-3 rounded-full bg-emerald-500 text-white shadow-xl hover:bg-emerald-600 hover:shadow-emerald-500/30 active:scale-95 transition-all duration-300 z-50 transform ${
+            showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'
+          }`}
+          aria-label="Cuộn lên đầu trang"
+        >
+          <MdKeyboardArrowUp size={28} />
+        </button>
       </main>
     </div>
   );

@@ -6,7 +6,6 @@ import {
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence,
   signOut, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -22,8 +21,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Luôn xử lý redirect OAuth TRƯỚC rồi mới subscribe onAuthStateChanged — tránh race
-  // (Safari hay gặp: callback auth chạy trước khi redirect hoàn tất → user = null → kẹt ở Login).
+  // Xử lý getRedirectResult ngay khi app khởi tạo để khắc phục vòng lặp Login do Mobile rớt phiên.
   useEffect(() => {
     let cancelled = false;
     let unsubscribe = () => {};
@@ -32,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       try {
         await getRedirectResult(auth);
       } catch (e) {
-        console.error(e);
+        console.error("Redirect Error:", e);
       }
       if (cancelled) return;
 
@@ -51,6 +49,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     try {
+      // 1. Dùng Popup ngay lập tức để không bị trình duyệt nhận diện nhầm Popup-ẩn.
       return await signInWithPopup(auth, googleProvider);
     } catch (error) {
       const fallbackCodes = new Set([
@@ -58,7 +57,14 @@ export const AuthProvider = ({ children }) => {
         'auth/popup-closed-by-user',
         'auth/cancelled-popup-request'
       ]);
+      // 2. Nếu popup bị trình duyệt chặn (đặc biệt: Safari, Chrome Mobile tích hợp) => Dùng Redirect
       if (fallbackCodes.has(error?.code)) {
+        try {
+          // Buộc sử dụng localStorage trước khi Redirect để không lặp lại lỗi mất phiên.
+          await setPersistence(auth, browserLocalPersistence);
+        } catch (e) {
+          console.warn("Chưa thể lưu Persistence:", e);
+        }
         return signInWithRedirect(auth, googleProvider);
       }
       throw error;
@@ -68,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 
   const loginWithUsername = async (username, password) => {
-    // 1. Find email by username in 'users' collection
+    // 1. Find email by username
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username.toLowerCase()));
     const querySnapshot = await getDocs(q);
@@ -80,12 +86,11 @@ export const AuthProvider = ({ children }) => {
     const userData = querySnapshot.docs[0].data();
     const email = userData.email;
 
-    // 2. Login with email and password
+    // 2. Login with email
     return signInWithEmailAndPassword(auth, email, password);
   };
   
   const signupWithEmail = async (email, password, displayName, username) => {
-    // 1. Check if username exists
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username.toLowerCase()));
     const querySnapshot = await getDocs(q);
@@ -94,13 +99,10 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Tên đăng nhập đã được sử dụng');
     }
 
-    // 2. Create user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
-    // 3. Update profile
     await updateProfile(userCredential.user, { displayName });
 
-    // 4. Save username mapping in Firestore
     await setDoc(doc(db, 'users', userCredential.user.uid), {
       uid: userCredential.user.uid,
       email: email.toLowerCase(),
@@ -113,7 +115,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => signOut(auth);
-
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
   const value = {

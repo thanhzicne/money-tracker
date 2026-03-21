@@ -5,7 +5,6 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   indexedDBLocalPersistence,
-  inMemoryPersistence,
   GoogleAuthProvider
 } from "firebase/auth";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
@@ -30,8 +29,7 @@ export const auth = initializeAuth(app, {
   persistence: [
     browserLocalPersistence,
     browserSessionPersistence,
-    indexedDBLocalPersistence,
-    inMemoryPersistence
+    indexedDBLocalPersistence
   ]
 });
 export const googleProvider = new GoogleAuthProvider();

@@ -4,6 +4,9 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
   signOut, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -48,14 +51,22 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     const ua = navigator.userAgent || '';
-    const isIOS = /iPad|iPhone|iPod/i.test(ua);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const isSafari =
       /Safari/i.test(ua) &&
       !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(ua);
 
-    // Safari / iOS: popup thường không đồng bộ session về tab chính → chỉ dùng redirect.
-    if (isSafari || isIOS) {
+    // Mobile/Safari: ưu tiên redirect + session persistence để ổn định sau vòng OAuth.
+    if (isMobile || isSafari) {
+      await setPersistence(auth, browserSessionPersistence);
       return signInWithRedirect(auth, googleProvider);
+    }
+
+    // Desktop: dùng popup cho UX nhanh hơn, nếu storage local không khả dụng thì fallback session.
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch {
+      await setPersistence(auth, browserSessionPersistence);
     }
 
     try {

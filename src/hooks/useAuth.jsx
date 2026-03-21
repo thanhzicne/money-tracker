@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   onAuthStateChanged, 
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut, 
@@ -19,22 +20,66 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    let authResolved = false;
+    let redirectResolved = false;
+
+    const resolveLoading = () => {
+      if (isMounted && authResolved && redirectResolved) {
+        setLoading(false);
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!isMounted) return;
       setUser(currentUser);
-      setLoading(false);
+      authResolved = true;
+      resolveLoading();
     });
 
-    // Bắt kết quả trả về từ Google sau khi Redirect (Quan trọng cho iOS/Safari)
-    getRedirectResult(auth).then((result) => {
-      if (result && result.user) {
-        setUser(result.user);
-      }
-    }).catch(console.error);
+    // Bắt kết quả trả về từ Google sau khi Redirect.
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user && isMounted) {
+          setUser(result.user);
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        redirectResolved = true;
+        resolveLoading();
+      });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
-  const loginWithGoogle = () => signInWithRedirect(auth, googleProvider);
+  const loginWithGoogle = async () => {
+    const userAgent = navigator.userAgent || '';
+    const isSafari =
+      /Safari/i.test(userAgent) &&
+      !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/i.test(userAgent);
+
+    if (isSafari || isIOS) {
+      try {
+        return await signInWithPopup(auth, googleProvider);
+      } catch (error) {
+        const fallbackCodes = new Set([
+          'auth/popup-blocked',
+          'auth/popup-closed-by-user',
+          'auth/cancelled-popup-request'
+        ]);
+        if (!fallbackCodes.has(error?.code)) {
+          throw error;
+        }
+      }
+    }
+
+    return signInWithRedirect(auth, googleProvider);
+  };
   
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 

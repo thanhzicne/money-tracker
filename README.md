@@ -44,14 +44,28 @@ Cho phép người dùng:
 
 ---
 
-# 💳 Tính năng nâng cao: Quản lý đa ví (Multiple Wallets)
+# 🌟 Những Tính Năng Nổi Bật (Mới Cập Nhật)
 
-Tính năng **Multiple Wallets** cho phép quản lý nhiều nguồn tài sản riêng biệt (Tiền mặt, Tài khoản ngân hàng, Thẻ tín dụng, Ví điện tử...). Mỗi ví hoạt động **độc lập**, giúp phản ánh chính xác tình trạng tài chính thực tế.
+### 🤖 Trợ lý AI: Reality Check (Cảnh tỉnh chốt đơn)
+- Tích hợp mô hình ngôn ngữ **Google Gemini AI** (chuẩn `gemini-2.5-flash` tiên tiến nhất).
+- Đóng vai "chuyên gia tài chính xéo xắt" để phản biện, phân tích và khuyên răn người dùng trước các quyết định mua sắm bốc đồng. AI tự động quy đổi giá trị món đồ thèm muốn ra số ngày đi làm, số bát phở... dựa vào đúng số dư và thu nhập thực tế của bạn.
+- **Bảo mật tuyệt đối:** Kiến trúc gọi API thông qua **Vercel Serverless Functions** (giấu kín hoàn toàn API Key ở cấp độ vòng bảo vệ Backend, không lộ ra code Frontend).
 
-- **Quản lý ví (Wallet CRUD):** Tạo, sửa, xóa ví (kèm cảnh báo khi xóa ví có chứa giao dịch).
-- **Tích hợp vào giao dịch:** Bắt buộc chọn ví liên quan khi tạo giao dịch mới.
-- **Chuyển tiền giữa các ví (Transfer Mode):** Tự động tạo 1 giao dịch trừ tiền ở ví nguồn và 1 giao dịch cộng tiền ở ví đích để cân bằng dữ liệu.
-- **Phân tích theo ví:** Xem tổng tài sản của tất cả ví hoặc dữ liệu của từng ví riêng biệt.
+### 💳 Quản lý Đa ví (Multiple Wallets) thông minh
+- Cho phép cá nhân hóa và tạo vô số nguồn tiền (Tiền mặt, Ngân hàng, Thẻ tín dụng, Ví điện tử...).
+- Tính năng **Chuyển tiền (Transfer)** giữa các ví tự động sinh cặp lệnh kép để cân bằng dòng tiền một cách chuẩn chỉ.
+- Dashboard theo dõi riêng biệt hoặc tổng hợp biến động từ mọi ví cộng lại.
+
+### 📄 Cỗ máy Xuất Báo cáo (PDF & Excel)
+- Truy xuất toàn bộ dữ liệu giao dịch thành báo cáo chỉ với 1 lượt click.
+- Tích hợp engine xuất **PDF** xử lý hoàn hảo **100% Tiếng Việt có dấu** kết hợp nhúng font chữ tùy chỉnh, định dạng bảng biểu báo cáo siêu nét.
+- Hỗ trợ xuất trực tiếp bảng tính **Excel (`.xlsx`)** cho những nhu cầu phân tích chuyên môn.
+
+### 🎨 Trải nghiệm & Giao diện Cao cấp (Premium UI/UX)
+- Hỗ trợ hoàn chỉnh giao diện **Dark Mode / Light Mode** thông minh thích ứng với màn hình.
+- Ứng dụng ngôn ngữ thiết kế **Glassmorphism**, đổ bóng Gradients mượt mà cùng bộ phối màu đẳng cấp, thoát khỏi vẻ nhàm chán của các app tài chính truyền thống.
+- Micro-animations cực kỳ tinh tế (Fade in, Slide up, Hover scale) trên từng thẻ chạm.
+- Tích hợp bảng điểm **Sức khỏe Tài chính** và hệ thống đăng ký theo dõi ở trang Profile cá nhân.
 
 ---
 

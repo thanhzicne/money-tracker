@@ -47,28 +47,21 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const loginWithGoogle = async () => {
-    try {
-      // 1. Dùng Popup ngay lập tức để không bị trình duyệt nhận diện nhầm Popup-ẩn.
-      return await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+  const loginWithGoogle = () => {
+    // 1. Dùng Popup ngay lập tức và ĐỒNG BỘ (Không async/await ở cấp này) để Safari không chặn chức năng Popup.
+    return signInWithPopup(auth, googleProvider).catch((error) => {
       const fallbackCodes = new Set([
         'auth/popup-blocked',
         'auth/popup-closed-by-user',
         'auth/cancelled-popup-request'
       ]);
-      // 2. Nếu popup bị trình duyệt chặn (đặc biệt: Safari, Chrome Mobile tích hợp) => Dùng Redirect
+      // 2. Chạy Fallback nếu bất đắc dĩ bị chặn
       if (fallbackCodes.has(error?.code)) {
-        try {
-          // Buộc sử dụng localStorage trước khi Redirect để không lặp lại lỗi mất phiên.
-          await setPersistence(auth, browserLocalPersistence);
-        } catch (e) {
-          console.warn("Chưa thể lưu Persistence:", e);
-        }
+        setPersistence(auth, browserLocalPersistence).catch(()=>{});
         return signInWithRedirect(auth, googleProvider);
       }
       throw error;
-    }
+    });
   };
   
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);

@@ -61,16 +61,17 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async (e) => {
+  const handleGoogleLogin = (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      setError('');
-      await loginWithGoogle();
-    } catch (err) {
-      setError("Lỗi đăng nhập Google: " + err.message);
-      setLoading(false);
-    }
+    setLoading(true);
+    setError('');
+    
+    // Phải gọi ĐỒNG BỘ ngay trong luồng onClick, nếu có `await` Safari sẽ chặn Popup
+    loginWithGoogle()
+      .catch((err) => {
+        setError("Lỗi đăng nhập Google: " + err.message);
+        setLoading(false);
+      });
   };
 
   return (

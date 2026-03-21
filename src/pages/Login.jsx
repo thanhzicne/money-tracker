@@ -19,7 +19,7 @@ const Login = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { loginWithGoogle, loginWithEmail, loginWithUsername, signupWithEmail, resetPassword } = useAuth();
+  const { loginWithGoogle, loginWithEmail, loginWithUsername, signupWithEmail, resetPassword, authSystemError } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,6 +144,13 @@ const Login = () => {
               {view === 'login' ? 'Hãy tiếp tục hành trình tài chính của bạn' : view === 'signup' ? 'Bắt đầu quản lý chi tiêu hiệu quả ngay hôm nay' : 'Nhập email để nhận hướng dẫn khôi phục'}
             </p>
           </div>
+
+          {authSystemError && (
+            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-4 rounded-2xl text-xs font-black mb-8 animate-shake flex items-center gap-3 leading-relaxed">
+              <div className="w-1 h-12 bg-amber-500 rounded-full"></div>
+              {authSystemError}
+            </div>
+          )}
 
           {error && (
             <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-2xl text-xs font-black mb-8 animate-shake flex items-center gap-3">

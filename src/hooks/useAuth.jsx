@@ -20,6 +20,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authSystemError, setAuthSystemError] = useState(null);
 
   // Xử lý getRedirectResult ngay khi app khởi tạo để khắc phục vòng lặp Login do Mobile rớt phiên.
   useEffect(() => {
@@ -28,9 +29,18 @@ export const AuthProvider = ({ children }) => {
 
     (async function initAuth() {
       try {
-        await getRedirectResult(auth);
+        const result = await getRedirectResult(auth);
+        if (!result) {
+          // Kiểm tra xem chúng ta có vừa mới kích hoạt vòng lặp redirect không
+          if (window.localStorage.getItem('awaiting_redirect') === 'true') {
+             // Đã redirect xong nhưng kết quả rỗng => Safari ITP đã xoá session!
+             setAuthSystemError("Trình duyệt Safari/iOS đã chặn liên kết Đăng nhập (Lỗi ITP). Vui lòng tắt 'Prevent Cross-Site Tracking' trong Cài đặt Safari, hoặc không dùng PWA/Local IP.");
+          }
+        }
+        window.localStorage.removeItem('awaiting_redirect');
       } catch (e) {
         console.error("Redirect Error:", e);
+        window.localStorage.removeItem('awaiting_redirect');
       }
       if (cancelled) return;
 
@@ -48,15 +58,24 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginWithGoogle = () => {
-    // 1. Dùng Popup ngay lập tức và ĐỒNG BỘ (Không async/await ở cấp này) để Safari không chặn chức năng Popup.
+    // Nếu là iOS PWA (Standalone), Popup sẽ mở ra ngoài Safari và kẹt ở đó. Nên ép dùng Redirect.
+    const isIos = /Mac|iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    
+    if (isIos && isStandalone) {
+       window.localStorage.setItem('awaiting_redirect', 'true');
+       setPersistence(auth, browserLocalPersistence).catch(()=>{});
+       return signInWithRedirect(auth, googleProvider);
+    }
+
     return signInWithPopup(auth, googleProvider).catch((error) => {
       const fallbackCodes = new Set([
         'auth/popup-blocked',
         'auth/popup-closed-by-user',
         'auth/cancelled-popup-request'
       ]);
-      // 2. Chạy Fallback nếu bất đắc dĩ bị chặn
       if (fallbackCodes.has(error?.code)) {
+        window.localStorage.setItem('awaiting_redirect', 'true');
         setPersistence(auth, browserLocalPersistence).catch(()=>{});
         return signInWithRedirect(auth, googleProvider);
       }
@@ -113,6 +132,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    authSystemError,
     loginWithGoogle,
     loginWithEmail,
     loginWithUsername,

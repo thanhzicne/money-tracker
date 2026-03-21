@@ -22,7 +22,8 @@ const Dashboard = ({
   deleteTransaction,
   selectedDate,
   wallets,
-  setActivePage
+  setActivePage,
+  jars
 }) => {
   const { t } = useTranslation();
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -111,7 +112,7 @@ const Dashboard = ({
                   <div className="flex-1 min-w-0 w-full">
                     <h4 className="font-black text-zinc-800 dark:text-white text-[9px] md:text-[10px] uppercase tracking-wider truncate">{wallet.name}</h4>
                     <p className={`text-xs md:text-sm font-black tracking-tight truncate ${balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(balance)}
+                      {`${new Intl.NumberFormat('vi-VN').format(balance)} VNĐ`}
                     </p>
                   </div>
                 </div>
@@ -123,14 +124,17 @@ const Dashboard = ({
 
       {/* Section 4: Management (Form & List) */}
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-stretch">
-        <TransactionForm 
-          onAdd={addTransaction} 
-          onUpdate={updateTransaction}
-          onTransfer={addTransfer}
-          editingTransaction={editingTransaction}
-          setEditingTransaction={setEditingTransaction}
-          wallets={wallets}
-        />
+        <div className="lg:col-span-1 space-y-4 md:space-y-6">
+          <TransactionForm 
+            onAdd={addTransaction} 
+            onUpdate={updateTransaction}
+            onTransfer={addTransfer}
+            editingTransaction={editingTransaction}
+            setEditingTransaction={setEditingTransaction}
+            wallets={wallets}
+            jars={jars}
+          />
+        </div>
         <TransactionList 
           transactions={filteredTransactions} 
           onEdit={setEditingTransaction} 

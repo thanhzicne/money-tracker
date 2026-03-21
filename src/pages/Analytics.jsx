@@ -99,7 +99,10 @@ const Analytics = ({ transactions, selectedDate }) => {
     .slice(0, 3);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { style: 'currency', currency: i18n.language === 'vi' ? 'VND' : 'USD' }).format(amount);
+    if (typeof i18n !== 'undefined' && i18n.language === 'en') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    }
+    return `${new Intl.NumberFormat('vi-VN').format(amount)} VNĐ`;
   };
 
   const formatDate = (dateStr) => {

@@ -10,7 +10,8 @@ import {
   doc, 
   setDoc,
   getDoc,
-  or
+  or,
+  writeBatch
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './useAuth';
@@ -31,6 +32,7 @@ export const useMoneyTracker = () => {
   const [budgets, setBudgets] = useState([]);
   const [debts, setDebts] = useState([]);
   const [investments, setInvestments] = useState([]);
+  const [jars, setJars] = useState([]);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -141,6 +143,23 @@ export const useMoneyTracker = () => {
       setInvestments(data);
     });
 
+    // 6. Jars Sync
+    const qJars = query(
+      collection(db, 'jars'),
+      or(
+        where('userId', '==', user.uid),
+        where('memberEmails', 'array-contains', user.email)
+      )
+    );
+
+    const unsubJars = onSnapshot(qJars, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setJars(data);
+    });
+
     // Fetch user settings (savings goal)
     const fetchSettings = async () => {
       try {
@@ -167,6 +186,7 @@ export const useMoneyTracker = () => {
       unsubBudgets();
       unsubDebts();
       unsubInvestments();
+      unsubJars();
     };
   }, [user]);
 
@@ -302,7 +322,7 @@ export const useMoneyTracker = () => {
       const amount = Number(t.amount);
       if (amount >= 5000000) {
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("Giao dịch Lớn", { body: `Bạn vừa ghi nhận một khoản chi khá lớn (${amount.toLocaleString()}đ)` });
+          new Notification("Giao dịch Lớn", { body: `Bạn vừa ghi nhận một khoản chi khá lớn (${new Intl.NumberFormat('vi-VN').format(amount)} VNĐ)` });
         }
       }
 
@@ -344,6 +364,16 @@ export const useMoneyTracker = () => {
       memberEmails,
       createdAt: new Date().toISOString()
     });
+
+    // Handle Jars Integration
+    if (t.type === 'income' && t.autoDistributeJars) {
+      await distributeIncome(Number(t.amount));
+    } else if (t.type === 'expense' && t.jarId) {
+      const jar = jars.find(j => j.id === t.jarId);
+      if (jar) {
+        await updateDoc(doc(db, 'jars', jar.id), { balance: Number(jar.balance || 0) - Number(t.amount) });
+      }
+    }
   };
 
   const addTransfer = async (transferData) => {
@@ -491,6 +521,79 @@ export const useMoneyTracker = () => {
     await deleteDoc(doc(db, 'investments', id));
   };
 
+  // --- JARS LOGIC ---
+  const addJar = async (jar) => {
+    if (!user) return;
+    const currentPercent = jars.reduce((sum, j) => sum + Number(j.percent || 0), 0);
+    if (currentPercent + Number(jar.percent || 0) > 100) {
+      throw new Error("Tổng phần trăm các hũ không được vượt quá 100%");
+    }
+    await addDoc(collection(db, 'jars'), {
+      ...jar,
+      balance: Number(jar.balance || 0),
+      percent: Number(jar.percent || 0),
+      userId: user.uid,
+      memberEmails: [user.email],
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  const updateJar = async (updated) => {
+    if (!user) return;
+    const { id, ...data } = updated;
+    const otherJarsPercent = jars.filter(j => j.id !== id).reduce((sum, j) => sum + Number(j.percent || 0), 0);
+    if (otherJarsPercent + Number(data.percent || 0) > 100) {
+      throw new Error("Tổng phần trăm các hũ không được vượt quá 100%");
+    }
+    await updateDoc(doc(db, 'jars', id), {
+      ...data,
+      balance: Number(data.balance || 0),
+      percent: Number(data.percent || 0)
+    });
+  };
+
+  const deleteJar = async (id) => {
+    if (!user) return;
+    const jar = jars.find(j => j.id === id);
+    if (jar && Number(jar.balance) > 0) {
+      throw new Error("Không thể xoá hũ đang có tiền. Vui lòng chuyển tiền sang hũ khác trước.");
+    }
+    await deleteDoc(doc(db, 'jars', id));
+  };
+
+  const distributeIncome = async (targetAmount) => {
+    if (!user || jars.length === 0) return;
+    const batch = writeBatch(db);
+    
+    // Bắt đầu cập nhật dựa trên percent của từng hũ
+    jars.forEach(jar => {
+      const percent = Number(jar.percent || 0);
+      if (percent > 0) {
+        const addedAmount = (targetAmount * percent) / 100;
+        const jarRef = doc(db, 'jars', jar.id);
+        batch.update(jarRef, { balance: Number(jar.balance || 0) + addedAmount });
+      }
+    });
+
+    await batch.commit();
+  };
+
+  const transferBetweenJars = async (fromJarId, toJarId, transferAmount) => {
+    if (!user || transferAmount <= 0) return;
+    const fromJar = jars.find(j => j.id === fromJarId);
+    const toJar = jars.find(j => j.id === toJarId);
+    if (!fromJar || !toJar) throw new Error("Hũ không hợp lệ");
+    
+    if (Number(fromJar.balance) < transferAmount) {
+      throw new Error(`Hũ ${fromJar.name} không đủ số dư.`);
+    }
+
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'jars', fromJar.id), { balance: Number(fromJar.balance) - transferAmount });
+    batch.update(doc(db, 'jars', toJar.id), { balance: Number(toJar.balance) + transferAmount });
+    await batch.commit();
+  };
+
   return {
     transactions,
     filteredTransactions,
@@ -527,6 +630,12 @@ export const useMoneyTracker = () => {
     netWorth,
     emailReport,
     updateEmailReportSetting,
-    loading
+    loading,
+    jars,
+    addJar,
+    updateJar,
+    deleteJar,
+    distributeIncome,
+    transferBetweenJars
   };
 };

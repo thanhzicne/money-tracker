@@ -46,6 +46,12 @@ Cho phép người dùng:
 
 # 🌟 Những Tính Năng Nổi Bật (Mới Cập Nhật)
 
+### 🍯 Hệ thống Hũ Chi Tiêu (Jars Financial System) Cá Nhân Hóa
+- Tích hợp phương pháp quản lý tài chính theo hũ thông minh. Cho phép người dùng toàn quyền **CRUD (Tạo, Xem, Sửa, Xóa)** các hũ chi tiêu với tỷ lệ % phân bổ linh hoạt theo nhu cầu cá nhân.
+- **Phân bổ tự động (Auto-distribution):** Tùy chọn tự động chia dòng tiền thu nhập vào các hũ (Thiết yếu, Đầu tư, Giáo dục, Hưởng thụ...) chỉ với một click.
+- **Ma trận Ví - Hũ chặt chẽ:** Kiểm soát luồng tiền kép. Một khoản chi tiêu sẽ trừ tiền thực tế ở một "Ví" cụ thể và đồng thời trừ ngân sách dự kiến ở một "Hũ", giúp chặn đứng nguy cơ tiêu lố.
+- **Luân chuyển & Cảnh báo:** Cho phép chuyển tiền nội bộ giữa các Hũ khi cần thiết và trực quan hóa ngân sách bằng thanh tiến trình (Progress bar) cảnh báo trạng thái cạn kiệt.
+
 ### 🤖 Trợ lý AI: Reality Check (Cảnh tỉnh chốt đơn)
 - Tích hợp mô hình ngôn ngữ **Google Gemini AI** (chuẩn `gemini-2.5-flash` tiên tiến nhất).
 - Đóng vai "chuyên gia tài chính xéo xắt" để phản biện, phân tích và khuyên răn người dùng trước các quyết định mua sắm bốc đồng. AI tự động quy đổi giá trị món đồ thèm muốn ra số ngày đi làm, số bát phở... dựa vào đúng số dư và thu nhập thực tế của bạn.
@@ -97,7 +103,8 @@ money-tracker
 │   │   ├── TransactionForm.jsx
 │   │   ├── TransactionList.jsx
 │   │   ├── Sidebar.jsx
-│   │   └── Charts.jsx
+│   │   ├── Charts.jsx
+│   │   └── JarsManager.jsx      
 │   ├── context
 │   │   └── AppContext.jsx
 │   ├── App.jsx

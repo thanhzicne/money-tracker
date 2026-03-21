@@ -25,7 +25,7 @@ const categoryIcons = {
   'Chuyển tiền nội bộ': '🔄'
 };
 
-const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setEditingTransaction, wallets }) => {
+const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setEditingTransaction, wallets, jars = [] }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('expense'); // 'expense', 'income', 'transfer'
   const [formData, setFormData] = useState({
@@ -36,6 +36,8 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
     note: '',
     walletId: '',
     toWalletId: '',
+    jarId: '',
+    autoDistributeJars: false,
     isRecurring: false
   });
 
@@ -54,10 +56,12 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
         type: activeTab,
         walletId: wallets[0]?.id || '',
         toWalletId: wallets[1]?.id || '',
+        jarId: '',
+        autoDistributeJars: false,
         category: categories[activeTab][0]
       }));
     }
-  }, [editingTransaction, wallets, activeTab]);
+  }, [editingTransaction, wallets, activeTab, jars]);
 
   const validate = () => {
     const newErrors = {};
@@ -71,6 +75,9 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
     } else {
       if (!formData.walletId) newErrors.walletId = 'Vui lòng chọn ví';
       if (!formData.category) newErrors.category = t('category') + ' không được để trống';
+      if (activeTab === 'expense' && jars.length > 0 && !formData.jarId) {
+        newErrors.jarId = 'Vui lòng chọn Hũ chi tiêu';
+      }
     }
     
     setErrors(newErrors);
@@ -91,6 +98,15 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
       });
     } else {
       const selectedWallet = wallets.find(w => w.id === formData.walletId);
+      
+      if (activeTab === 'expense' && jars.length > 0 && formData.jarId) {
+        const selectedJar = jars.find(j => j.id === formData.jarId);
+        if (selectedJar && Number(formData.amount) > Number(selectedJar.balance)) {
+           const confirm = window.confirm(`Hũ "${selectedJar.name}" chỉ còn ${new Intl.NumberFormat('vi-VN').format(selectedJar.balance)} VNĐ.\nBạn có chắc muốn ghi nhận mức chi vượt quá số dư này không?`);
+           if (!confirm) return;
+        }
+      }
+
       const transaction = {
         ...formData,
         type: activeTab,
@@ -118,6 +134,8 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
       note: '',
       walletId: wallets[0]?.id || '',
       toWalletId: wallets[1]?.id || '',
+      jarId: '',
+      autoDistributeJars: false,
       isRecurring: false
     });
     setErrors({});
@@ -133,6 +151,12 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
     value: cat,
     label: cat,
     icon: categoryIcons[cat] || '✨'
+  }));
+
+  const jarOptions = jars.map(j => ({
+    value: j.id,
+    label: `${j.name} (${new Intl.NumberFormat('vi-VN').format(j.balance)})`,
+    icon: '📦'
   }));
 
   return (
@@ -212,6 +236,48 @@ const TransactionForm = ({ onAdd, onUpdate, onTransfer, editingTransaction, setE
                 placeholder={t('category')}
               />
             </div>
+
+            {/* Jar Selection if Expense */}
+            {activeTab === 'expense' && jars.length > 0 && (
+              <div className="space-y-2 col-span-1 md:col-span-2">
+                <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Thuộc Hũ Chi Tiêu</label>
+                <div className="bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-700/50 p-2">
+                  <select
+                    value={formData.jarId}
+                    onChange={(e) => setFormData({ ...formData, jarId: e.target.value })}
+                    className="w-full bg-transparent font-bold text-sm outline-none px-2 py-1"
+                  >
+                    <option value="">-- Chọn Hũ Chi Tiêu (Bắt Buộc) --</option>
+                    {jars.map(j => (
+                      <option key={j.id} value={j.id}>{j.name} ({new Intl.NumberFormat('vi-VN').format(j.balance)} VNĐ)</option>
+                    ))}
+                  </select>
+                </div>
+                {errors.jarId && <p className="text-rose-500 text-[10px] font-black uppercase tracking-wider mt-1 ml-1">{errors.jarId}</p>}
+              </div>
+            )}
+
+            {/* Auto Distribute Checkbox if Income */}
+            {activeTab === 'income' && jars.length > 0 && (
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 flex items-center justify-between col-span-1 md:col-span-2 mt-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                    <MdAccountBalanceWallet size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">TỰ ĐỘNG PHÂN BỔ VÀO HŨ</p>
+                    <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500">Chia khoản thu này vào các Hũ theo tỷ lệ</p>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setFormData({ ...formData, autoDistributeJars: !formData.autoDistributeJars })}
+                  className={`w-12 h-6 rounded-full transition-all relative ${formData.autoDistributeJars ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.autoDistributeJars ? 'left-7' : 'left-1'}`}></div>
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">

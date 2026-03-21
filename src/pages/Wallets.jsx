@@ -89,7 +89,10 @@ const Wallets = ({ wallets, addWallet, updateWallet, deleteWallet, totalBalance,
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    if (typeof i18n !== 'undefined' && i18n.language === 'en') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    }
+    return `${new Intl.NumberFormat('vi-VN').format(amount)} VNĐ`;
   };
 
   return (

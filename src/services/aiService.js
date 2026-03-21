@@ -1,5 +1,5 @@
 export const formatFinancialContext = (totalBalance, income, expense) => {
-  const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+  const formatter = { format: (amt) => `${new Intl.NumberFormat('vi-VN').format(amt)} VNĐ` };
   return `
 --- NGỮ CẢNH TÀI CHÍNH CỦA NGƯỜI DÙNG ---
 - Tổng tài sản / Số dư tài khoản hiện tại: ${formatter.format(totalBalance || 0)}

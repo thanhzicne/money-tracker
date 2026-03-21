@@ -7,8 +7,10 @@ import Wallets from './pages/Wallets';
 import Budgeting from './pages/Budgeting';
 import Debts from './pages/Debts';
 import Investments from './pages/Investments';
+import Jars from './pages/Jars';
 import Login from './pages/Login';
 import { useMoneyTracker } from './hooks/useMoneyTracker';
+import { useNotifications } from './hooks/useNotifications';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 
 import { ThemeProvider } from './hooks/useTheme';
@@ -17,6 +19,7 @@ function AppContent() {
   const { user } = useAuth();
   const [activePage, setActivePage] = useState('dashboard');
   const tracker = useMoneyTracker();
+  const alerts = useNotifications(tracker.jars, tracker.debts, tracker.budgets, tracker.transactions);
 
   if (!user) {
     return <Login />;
@@ -76,6 +79,17 @@ function AppContent() {
             netWorth={tracker.netWorth}
           />
         );
+      case 'jars':
+        return (
+          <Jars 
+            jars={tracker.jars}
+            addJar={tracker.addJar}
+            updateJar={tracker.updateJar}
+            deleteJar={tracker.deleteJar}
+            totalBalance={tracker.totalBalance}
+            transferBetweenJars={tracker.transferBetweenJars}
+          />
+        );
       case 'profile':
         return (
           <Profile 
@@ -104,6 +118,7 @@ function AppContent() {
       activeWalletId={tracker.activeWalletId}
       setActiveWalletId={tracker.setActiveWalletId}
       budgets={tracker.budgets}
+      alerts={alerts}
     >
       {tracker.loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">

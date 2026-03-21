@@ -50,7 +50,7 @@ export const exportToPDF = (transactions, fileName = 'transactions_report.pdf') 
       removeAccents(t.type === 'income' ? 'Thu nhap' : 'Chi tieu'),
       removeAccents(t.category),
       // For currency, we'll use a simplified format to avoid 'đ' symbol issues
-      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'VND' }).format(t.amount).replace('$', ''),
+      `${new Intl.NumberFormat('vi-VN').format(t.amount)} VNĐ`,
       removeAccents(t.note || '')
     ]);
 

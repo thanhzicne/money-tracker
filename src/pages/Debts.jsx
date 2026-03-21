@@ -89,7 +89,10 @@ const Debts = ({ debts, addDebt, updateDebt, deleteDebt, wallets, addTransaction
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    if (typeof i18n !== 'undefined' && i18n.language === 'en') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    }
+    return `${new Intl.NumberFormat('vi-VN').format(amount)} VNĐ`;
   };
 
   const borrowList = debts.filter(d => d.type === 'borrow');
@@ -98,6 +101,8 @@ const Debts = ({ debts, addDebt, updateDebt, deleteDebt, wallets, addTransaction
   const renderDebtCard = (debt) => {
     const remaining = debt.totalAmount - (debt.paidAmount || 0);
     const isPaid = remaining <= 0;
+    const isOverdue = !isPaid && debt.dueDate && new Date(debt.dueDate) < new Date(new Date().setHours(0,0,0,0));
+    const isUpcoming = !isPaid && debt.dueDate && new Date(debt.dueDate) >= new Date() && new Date(debt.dueDate) <= new Date(new Date().setDate(new Date().getDate() + 3));
 
     return (
       <div key={debt.id} className={`card group p-6 relative overflow-hidden transition-all hover:shadow-xl ${isPaid ? 'opacity-70' : ''}`}>
@@ -133,6 +138,17 @@ const Debts = ({ debts, addDebt, updateDebt, deleteDebt, wallets, addTransaction
             </p>
           </div>
         </div>
+
+        {debt.dueDate && (
+          <div className={`text-[10px] font-black uppercase tracking-widest mt-2 px-3 py-1.5 inline-block rounded-lg mb-3 ${
+            isPaid ? 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' 
+            : isOverdue ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800' 
+            : isUpcoming ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800' 
+            : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+          }`}>
+            ⏱ Hạn: {new Date(debt.dueDate).toLocaleDateString('vi-VN')} {isOverdue && '(Đã quá hạn)'} {isUpcoming && '(Sắp đến hạn)'}
+          </div>
+        )}
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm font-black">
@@ -256,6 +272,15 @@ const Debts = ({ debts, addDebt, updateDebt, deleteDebt, wallets, addTransaction
                   onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
                   className="input-field font-bold text-sm"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-zinc-500 uppercase">Ngày Đáo Hạn (Tùy chọn)</label>
+                <input 
+                  type="date" 
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                  className="input-field font-bold text-sm"
                 />
               </div>
               <div className="space-y-2">

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   onAuthStateChanged, 
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -22,10 +23,18 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setLoading(false);
     });
+
+    // Bắt kết quả trả về từ Google sau khi Redirect (Quan trọng cho iOS/Safari)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        setUser(result.user);
+      }
+    }).catch(console.error);
+
     return () => unsubscribe();
   }, []);
 
-  const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+  const loginWithGoogle = () => signInWithRedirect(auth, googleProvider);
   
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 

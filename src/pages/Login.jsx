@@ -61,15 +61,15 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault();
     try {
+      setLoading(true);
       setError('');
-      // QUAN TRỌNG: Gọi ngay lập tức, KHÔNG setLoading trước để tránh Safari chặn Popup
       await loginWithGoogle();
     } catch (err) {
-      if (!err.message.includes('popup-closed-by-user')) {
-        setError("Lỗi đăng nhập Google: " + err.message);
-      }
+      setError("Lỗi đăng nhập Google: " + err.message);
+      setLoading(false);
     }
   };
 

@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import {
   initializeAuth,
+  browserPopupRedirectResolver,
   browserLocalPersistence,
   browserSessionPersistence,
   indexedDBLocalPersistence,
@@ -24,6 +25,7 @@ const app = initializeApp(firebaseConfig);
 
 // Auth
 export const auth = initializeAuth(app, {
+  popupRedirectResolver: browserPopupRedirectResolver,
   persistence: [
     indexedDBLocalPersistence,
     browserLocalPersistence,

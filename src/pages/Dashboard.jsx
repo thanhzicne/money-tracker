@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MdDownload, MdTableChart, MdPictureAsPdf } from 'react-icons/md';
+import { MdDownload, MdTableChart, MdPictureAsPdf, MdAutoAwesome } from 'react-icons/md';
 import SummaryCards from '../components/SummaryCards';
 import SavingsGoal from '../components/SavingsGoal';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import DashboardCharts from '../components/DashboardCharts';
+import RealityCheckModal from '../components/RealityCheckModal';
 import { exportToExcel, exportToPDF } from '../utils/exportUtils';
 
 const Dashboard = ({ 
@@ -25,15 +26,28 @@ const Dashboard = ({
 }) => {
   const { t } = useTranslation();
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [isRealityCheckOpen, setIsRealityCheckOpen] = useState(false);
 
   return (
     <div className="space-y-8">
       {/* Section 1: Summary & Export */}
-      <section className="flex flex-col gap-6 md:gap-8 items-start">
-        <div className="flex-1 w-full">
+      <section className="flex flex-col xl:flex-row gap-6 md:gap-8 items-start w-full">
+        <div className="flex-1 w-full space-y-6">
           <SummaryCards stats={stats} />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-br from-rose-50 to-purple-50 dark:from-slate-800 dark:to-slate-800 p-4 md:p-5 rounded-3xl border border-rose-100 dark:border-rose-900/30">
+            <div>
+              <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm">Bạn sắp chốt đơn món đắt tiền?</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Để chuyên gia AI phản biện giúp bạn trước khi đưa ra quyết định nhé.</p>
+            </div>
+            <button 
+              onClick={() => setIsRealityCheckOpen(true)}
+              className="flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] active:scale-[0.98] transition-all text-xs tracking-wide whitespace-nowrap shrink-0"
+            >
+              <MdAutoAwesome size={16} /> Hỏi AI trước khi mua
+            </button>
+          </div>
         </div>
-        <div className="w-full lg:w-80 card p-5 md:p-6 flex flex-col gap-3 md:gap-4">
+        <div className="w-full xl:w-80 card p-5 md:p-6 flex flex-col gap-3 md:gap-4 shrink-0">
           <h3 className="text-xs md:text-sm font-black text-zinc-800 dark:text-white uppercase tracking-widest mb-2 flex items-center gap-2">
             <MdDownload className="text-emerald-500" size={18} />
             {t('export_data')}
@@ -128,6 +142,14 @@ const Dashboard = ({
       <section>
         <DashboardCharts transactions={filteredTransactions} selectedDate={selectedDate} />
       </section>
+
+      <RealityCheckModal 
+        isOpen={isRealityCheckOpen} 
+        onClose={() => setIsRealityCheckOpen(false)} 
+        totalBalance={stats?.balance || 0} 
+        income={stats?.income || 0} 
+        expense={stats?.expense || 0} 
+      />
     </div>
   );
 };

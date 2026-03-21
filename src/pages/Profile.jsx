@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
-import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars, MdSecurityUpdateGood, MdTrendingUp, MdSavings, MdLocalFireDepartment, MdOutlineMail } from 'react-icons/md';
+import { MdEmail, MdPerson, MdLogout, MdDateRange, MdStars, MdSecurityUpdateGood, MdTrendingUp, MdSavings, MdLocalFireDepartment, MdOutlineMail, MdAutoAwesome } from 'react-icons/md';
 
 const Profile = ({ transactionsCount, totalBalance, netWorth, stats, savingsProgress, transactions = [], emailReport, updateEmailReportSetting }) => {
   const { t, i18n } = useTranslation();

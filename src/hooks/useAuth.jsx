@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   onAuthStateChanged, 
-  signInWithPopup, 
+  signInWithRedirect, 
   signOut, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+  const loginWithGoogle = () => signInWithRedirect(auth, googleProvider);
   
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 

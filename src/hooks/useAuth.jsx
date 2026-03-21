@@ -50,29 +50,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginWithGoogle = async () => {
-    const ua = navigator.userAgent || '';
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    const isSafari =
-      /Safari/i.test(ua) &&
-      !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(ua);
-
-    // Mobile/Safari: ưu tiên redirect + local persistence để ổn định sau vòng OAuth.
-    if (isMobile || isSafari) {
-      try {
-        await setPersistence(auth, browserLocalPersistence);
-      } catch {
-        await setPersistence(auth, browserSessionPersistence);
-      }
-      return signInWithRedirect(auth, googleProvider);
-    }
-
-    // Desktop: dùng popup cho UX nhanh hơn, nếu storage local không khả dụng thì fallback session.
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-    } catch {
-      await setPersistence(auth, browserSessionPersistence);
-    }
-
     try {
       return await signInWithPopup(auth, googleProvider);
     } catch (error) {

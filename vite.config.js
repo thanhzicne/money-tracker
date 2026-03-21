@@ -10,6 +10,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Tránh navigate fallback can thiệp các URL có prefix Firebase / OAuth (giảm lỗi auth sau redirect)
+      workbox: {
+        navigateFallbackDenylist: [/^\/__\//],
+      },
       // Cập nhật lại favicon.svg theo đúng file index.html của bạn
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {

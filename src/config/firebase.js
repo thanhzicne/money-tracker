@@ -26,10 +26,11 @@ const app = initializeApp(firebaseConfig);
 // Auth
 export const auth = initializeAuth(app, {
   popupRedirectResolver: browserPopupRedirectResolver,
+  // Safari ổn định hơn với localStorage trước IndexedDB cho auth token
   persistence: [
-    indexedDBLocalPersistence,
     browserLocalPersistence,
     browserSessionPersistence,
+    indexedDBLocalPersistence,
     inMemoryPersistence
   ]
 });

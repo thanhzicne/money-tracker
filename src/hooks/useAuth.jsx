@@ -19,66 +19,58 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Luôn xử lý redirect OAuth TRƯỚC rồi mới subscribe onAuthStateChanged — tránh race
+  // (Safari hay gặp: callback auth chạy trước khi redirect hoàn tất → user = null → kẹt ở Login).
   useEffect(() => {
-    let isMounted = true;
-    let authResolved = false;
-    let redirectResolved = false;
+    let cancelled = false;
+    let unsubscribe = () => {};
 
-    const resolveLoading = () => {
-      if (isMounted && authResolved && redirectResolved) {
-        setLoading(false);
+    (async function initAuth() {
+      try {
+        await getRedirectResult(auth);
+      } catch (e) {
+        console.error(e);
       }
-    };
+      if (cancelled) return;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!isMounted) return;
-      setUser(currentUser);
-      authResolved = true;
-      resolveLoading();
-    });
-
-    // Bắt kết quả trả về từ Google sau khi Redirect.
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user && isMounted) {
-          setUser(result.user);
-        }
-      })
-      .catch(console.error)
-      .finally(() => {
-        redirectResolved = true;
-        resolveLoading();
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (cancelled) return;
+        setUser(currentUser);
+        setLoading(false);
       });
+    })();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
       unsubscribe();
     };
   }, []);
 
   const loginWithGoogle = async () => {
-    const userAgent = navigator.userAgent || '';
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/i.test(ua);
     const isSafari =
-      /Safari/i.test(userAgent) &&
-      !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(userAgent);
-    const isIOS = /iPad|iPhone|iPod/i.test(userAgent);
+      /Safari/i.test(ua) &&
+      !/Chrome|CriOS|Edg|OPR|FxiOS|Android/i.test(ua);
 
+    // Safari / iOS: popup thường không đồng bộ session về tab chính → chỉ dùng redirect.
     if (isSafari || isIOS) {
-      try {
-        return await signInWithPopup(auth, googleProvider);
-      } catch (error) {
-        const fallbackCodes = new Set([
-          'auth/popup-blocked',
-          'auth/popup-closed-by-user',
-          'auth/cancelled-popup-request'
-        ]);
-        if (!fallbackCodes.has(error?.code)) {
-          throw error;
-        }
-      }
+      return signInWithRedirect(auth, googleProvider);
     }
 
-    return signInWithRedirect(auth, googleProvider);
+    try {
+      return await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      const fallbackCodes = new Set([
+        'auth/popup-blocked',
+        'auth/popup-closed-by-user',
+        'auth/cancelled-popup-request'
+      ]);
+      if (fallbackCodes.has(error?.code)) {
+        return signInWithRedirect(auth, googleProvider);
+      }
+      throw error;
+    }
   };
   
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
